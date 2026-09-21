@@ -1,245 +1,338 @@
 # AutoLinkX
 
-AutoLinkX is a planned car marketplace where sellers list vehicles, buyers discover and inquire about cars, and administrators moderate listings. One account can both buy and sell.
+AutoLinkX is a planned car marketplace where sellers list vehicles, buyers discover cars and contact sellers, and administrators moderate listings. One account can both buy and sell.
 
 ## Current status
 
-**Planning only — the application is not implemented yet.** Repository inspection found only this README: no application code, dependencies, database, migrations, templates, tests, or `AGENTS.md`. There is no existing Django application or data to migrate in this checkout.
+**Planning only.** This repository contains this README, with no application code, dependencies, migrations, or tests. The initial inspection found no existing Django application or `AGENTS.md`. No application tests or deployments have been performed.
 
-The agreed stack is **Next.js with TypeScript**, replacing the original Django proposal. Django authentication and Django Admin will be replaced by a session authentication library and a custom moderation dashboard.
+The agreed stack is **Next.js + Supabase**. Next.js provides the website and business workflows; Supabase provides Auth, PostgreSQL, and Storage. We will build a custom moderation dashboard.
+
+This replaces the earlier Better Auth, ORM, and dual-database proposal. **Use local Supabase/PostgreSQL instead of SQLite**, keeping database functions and access policies consistent across environments. Django, NestJS, a separate REST backend, and an ORM are not required.
 
 ### Implemented
 
-- Repository initialized and product architecture and delivery plan documented.
+- Repository initialized.
+- Product, architecture, infrastructure, and implementation plan documented.
 
-### Planned for the first release
+### Planned first release
 
-- Registration, login, logout, password reset, and profile editing.
-- Seller listing creation, photos, editing, submission, archiving, and sold status.
-- Public search, filters, sorting, pagination, and vehicle detail pages.
+- Registration, login, logout, email confirmation, password recovery, and profile editing.
+- Seller listing creation/editing, ordered photos, cover selection, submission, archiving, and sold status.
+- Published vehicle search, filters, sorting, pagination, and details.
 - Favorites, buyer inquiries, seller inbox, and listing reports.
-- Administrator approval, rejection with reasons, and report resolution.
-- Responsive, accessible pages with validation, loading, empty, error, and success states.
+- Administrator approval/rejection with reasons, report resolution, and audit history.
+- Responsive, accessible pages with loading, validation, empty, error, and success states.
 
-Payments, financing, real-time chat, reviews, and AI features are outside this release.
+Payments, financing, real-time chat, reviews, AI features, and Supabase Realtime are outside this release. Provisioning hosted resources and deploying are separate tasks.
 
-## Target architecture
+## Application architecture
 
-Use a single Next.js application with App Router. Server Components render pages; small Client Components handle interactive forms, photo previews, and pending feedback. Server Actions perform ordinary form mutations. Route Handlers are reserved for authentication endpoints and bounded image uploads/media access. No separate frontend, NestJS service, or general-purpose REST API is needed.
+Use one Next.js App Router application. Server Components render pages; Server Actions handle ordinary forms; Route Handlers handle authentication callbacks and bounded image upload/delivery. Client Components are limited to gallery controls, upload previews, and form interaction.
 
 ```mermaid
 flowchart TD
-    Browser[Buyer / seller browser] --> Pages[Next.js App Router pages]
-    Admin[Administrator browser] --> AdminPages[Moderation pages]
-    Pages --> Reads[Authorized query layer]
-    Pages --> Actions[Server Actions / upload handlers]
-    AdminPages --> Actions
-    Actions --> Services[Domain services: validation, permissions, transitions]
-    Services --> DB[Database access]
-    Reads --> DB
-    DB --> SQLite[(SQLite: local development)]
-    DB --> Postgres[(PostgreSQL: production)]
-    Services --> Media[Image storage adapter]
-    Services --> Email[Email adapter]
-    Auth[Session authentication] --> Reads
-    Auth --> Services
+    Buyer[Buyer / seller] --> Pages[Next.js pages]
+    Admin[Administrator] --> Dashboard[Moderation dashboard]
+    Pages --> Queries[Authorized server queries]
+    Pages --> Actions[Server Actions and handlers]
+    Dashboard --> Actions
+    Actions --> Services[Validation and domain services]
+    Services --> Auth[Supabase Auth: verified identity]
+    Services --> RPC[Transactional PostgreSQL functions]
+    Queries --> DataAPI[Supabase Data API with user context]
+    RPC --> DB[(PostgreSQL: constraints and RLS)]
+    DataAPI --> DB
+    Services --> Images[Validated image processing]
+    Images --> Storage[Private Supabase Storage]
+    Auth --> Mail[Custom SMTP / local mail capture]
 ```
-
-### Technology decisions
 
 | Concern | Planned approach |
 | --- | --- |
-| Runtime | Supported Node.js LTS; pin the exact version during foundation |
-| Application | Next.js App Router, React, TypeScript; pin compatible stable dependencies and commit the lockfile |
-| Styling | Shared CSS tokens and responsive components; preserve AutoLinkX branding |
-| Authentication | Better Auth with email/password and database sessions; verify adapter compatibility during foundation |
-| Database | Drizzle ORM with SQLite locally and PostgreSQL for deployment |
-| Validation | Zod schemas plus database constraints; validate again on the server |
-| Images | Sharp for decoding, size checks, normalization, and metadata removal |
-| Email | SMTP adapter for resets; local development mail capture |
-| Testing | Vitest for domain/integration tests and Playwright for browser workflows |
+| Runtime | Supported Node.js LTS; pin compatible Node.js, Next.js, and package versions during foundation |
+| UI | Next.js App Router, React, TypeScript, shared CSS tokens and accessible components |
+| Authentication | Supabase Auth email/password with `@supabase/ssr` |
+| Data access | `@supabase/supabase-js`, generated database types, SQL RPC functions for transactions |
+| Database | PostgreSQL through local Supabase and separate hosted staging/production projects |
+| Authorization | Server checks plus row-level security (RLS), grants, and controlled mutation functions |
+| Images | Sharp decoding/normalization and private Supabase Storage |
+| Migrations | Versioned SQL in `supabase/migrations/`; Supabase CLI as the single migration tool |
+| Tests | Vitest, database/RLS integration tests, and Playwright |
+| Web hosting | Managed container host with HTTPS ingress; provider chosen before deployment |
 
-SQLite and PostgreSQL require dialect-specific schemas/migrations. Maintain both under one logical data model and run the same behavioral test suite against each. Changing a connection string does not transfer SQLite data to PostgreSQL. Use explicit migrations, never automatic destructive schema synchronization.
+Keep accounts, listings, interactions, moderation, and infrastructure as folders inside one application. Pages/actions parse requests and call services. TypeScript services validate inputs; database functions own atomic mutations and security invariants. Several independent Supabase API requests are not a database transaction.
 
-### Application boundaries
+## Authentication and security boundaries
 
-- **Accounts:** authentication integration, profiles, private contact preferences, session checks.
-- **Listings:** specifications, photo metadata, ownership, lifecycle rules, and public queries.
-- **Interactions:** favorites, inquiries, reports, and persistent spam limits.
-- **Moderation:** protected queues, decisions, reasons, and audit history; calls the same listing services as seller actions.
-- **Infrastructure:** validated environment configuration, database adapters, storage, mail, and logging.
+Use request-scoped server clients carrying the user's session. Follow Supabase's SSR cookie and token-refresh integration for the pinned Next.js release. Verify identity using the supported verified-claims/user APIs; do not trust an unverified cookie or `getSession()` result. Restrict confirmation/recovery redirects to allowed application destinations. See [Supabase SSR guidance](https://supabase.com/docs/guides/auth/server-side/creating-a-client).
 
-Keep these as folders within one application. Pages and actions remain thin: they parse requests and call services. Services enforce business rules in transactions. The query layer returns explicit public or private projections so email addresses and internal notes never accidentally reach browser props.
+Use the library's supported cookie behavior: Supabase browser/SSR flows must not be described as a custom system with exclusively HTTP-only cookies. Apply HTTPS, appropriate cookie settings, origin/CSRF checks, content security policy, and output escaping. Test password-reset session revocation and document the residual validity of already issued access tokens.
 
-Every Server Action and Route Handler must independently authenticate and authorize its request. Hiding a button or guarding a layout is not access control. This follows the [Next.js authentication guidance](https://nextjs.org/docs/app/guides/authentication).
+Every Server Action and handler must authorize independently. Hidden buttons and layout guards are insufficient. See [Next.js authentication guidance](https://nextjs.org/docs/app/guides/authentication).
+
+### RLS and direct API protection
+
+Supabase APIs can be called outside Next.js. Access must remain safe when a caller uses the publishable project key and their own token directly.
+
+| Resource | Read access | Mutation rules |
+| --- | --- | --- |
+| Listings | Published publicly; own rows for sellers; all for administrators | Controlled functions enforce owner, version, role, and transition |
+| Public profile | Display name/location and explicitly published contact values | Owner updates through a function without role-changing access |
+| Private contact | Owner only | Owner-scoped validated updates |
+| Favorites | Their owner | Idempotent add/remove; unique user/listing pair |
+| Inquiries | Buyer and listing owner | Creation checks availability and limits atomically; seller can mark read |
+| Reports | Reporter-safe projection; full record for administrators | Controlled create/resolve; internal resolution notes excluded from reporter data |
+| Audit history | Owner-safe decision history; full administrator history | Append only through lifecycle functions |
+| Administrator membership | Restricted membership lookup | Operator-only bootstrap; never editable through profiles |
+| Storage objects | Controlled media delivery | Validated server upload; no unrestricted direct object writes |
+
+Enable RLS on exposed tables and minimum grants. RLS protects rows, not columns: keep private contacts and internal fields in separate tables/projections. Put administrator membership and rate-limit internals in a non-exposed schema where practical.
+
+Revoke direct listing/photo writes from browser roles. Expose narrow RPC commands such as `save_listing`, `submit_listing`, `mark_sold`, `moderate_listing`, and `create_inquiry`. Functions must derive the actor from `auth.uid()`, reject missing identity, check database administrator membership, and enforce expected versions. Never authorize administrators through editable user metadata.
+
+Where security-definer functions are necessary, fix the search path, qualify objects, restrict EXECUTE grants, and explicitly check every target and permission. Review their RLS-bypass behavior. Policies and grants must prevent callers from bypassing these functions.
+
+Routine requests use the publishable key plus user identity. Isolate secret/service-role clients in a server-only module for Auth administration, validated Storage writes, and maintenance. These credentials bypass RLS: never expose them in browser bundles, general query helpers, or logs. Privileged functions independently establish the authorized owner and target.
 
 ## Data model
 
 | Entity | Main fields and constraints |
 | --- | --- |
-| User and auth tables | Library-managed identity, credentials, sessions, and reset tokens; normal user or administrator role; users cannot assign their own role |
-| Profile | Unique user relation, display name, location, optional phone and public contact address; contact publication flags default to false |
-| Listing | Seller, make, model, year, price in integer minor units, currency, mileage in km, transmission, fuel type, location, condition, description, status, version, timestamps |
-| ListingPhoto | Listing, random storage key, display order, dimensions, cover flag; at most one cover per listing |
-| Favorite | User, listing, created timestamp; database uniqueness on user + listing |
-| Inquiry | Buyer, listing, message, created timestamp, optional seller-read timestamp; private to buyer and listing owner |
-| Report | Reporter, listing, category, explanation, open/resolved/dismissed status, resolution note, resolver, timestamps |
-| ListingEvent | Listing, actor, previous/new status, reason, listing version, timestamp; append-only moderation audit |
-| RateLimitBucket | Action, hashed actor/IP key, time window, count; atomic updates and expiry cleanup |
+| `auth.users` | Supabase-managed identity; no duplicate password/session implementation |
+| `profiles` | User ID, display name, location, separately opted-in public contact values |
+| Private contact record | User ID, private phone/email, publication preferences |
+| Administrator membership | Unique user ID, grant actor/time; no client write access |
+| `listings` | Seller, make/model, year, price in integer minor units, currency, mileage in km, transmission, fuel, location, condition, description, status, version, timestamps |
+| `listing_photos` | Listing, random storage key, display order, dimensions, cover flag |
+| `favorites` | User/listing pair with unique constraint, created time |
+| `inquiries` | Buyer, listing, bounded message, created time, seller-read time |
+| `reports` | Reporter, listing, category, explanation, open/resolved/dismissed status, resolution note, resolver, timestamps |
+| `listing_events` | Listing, actor, previous/new status, reason, version, timestamp; append-only |
+| Rate-limit buckets | Action, actor or hashed trusted IP key, window/count, expiry |
+| Upload staging | Owner, object key, validation/attachment state, expiry |
 
-Use foreign keys, nonnegative numeric checks, valid status constraints, and indexes for status/publication date, seller/status, common search filters, and inbox queries. Enforce one open report per reporter/listing. Use one configured marketplace currency for the first release; do not compare mixed currencies in price filters.
+Use foreign keys, numeric/status checks, one-cover-per-listing uniqueness, and one-open-report-per-reporter/listing uniqueness. Index publication time, seller/status, inbox relationships, and common filters. Use one configured marketplace currency. Profile initialization must tolerate partial onboarding and retries.
 
-## Listing lifecycle and permissions
+## Listing lifecycle
 
-All new listings start as `draft`. The server determines the seller from the session and never accepts an arbitrary owner or status from a form.
+New listings start as `draft`; derive the owner from verified identity.
 
-| From | To | Who and when |
+| From | To | Actor and condition |
 | --- | --- | --- |
-| draft | pending_review | Owner submits a complete, valid listing with at least one photo |
-| rejected | pending_review | Owner corrects and resubmits the listing |
-| pending_review | published | Administrator approves; actor must not be the seller |
-| pending_review | rejected | Administrator rejects with a required reason; actor must not be the seller |
-| pending_review | draft | Owner withdraws or changes substantive details |
-| published | pending_review | Owner saves valid substantive changes; immediately removed from public visibility |
-| published | sold | Owner marks vehicle sold |
-| published | rejected | Administrator removes a violating listing with a required reason; actor must not be the seller |
-| draft, pending_review, published, rejected, sold | archived | Owner archives the listing |
-| archived | draft | Owner explicitly restores for editing; publication requires review again |
+| draft | pending_review | Owner submits complete valid details and at least one validated photo |
+| rejected | pending_review | Owner corrects and resubmits |
+| pending_review | published | Administrator approves another user's listing |
+| pending_review | rejected | Administrator rejects another user's listing with a reason |
+| pending_review | draft | Owner withdraws or edits substantive details |
+| published | pending_review | Owner saves valid substantive changes; immediately removed from public discovery |
+| published | sold | Owner marks sold |
+| published | rejected | Administrator removes another user's violating listing with a reason |
+| draft, pending_review, published, rejected, sold | archived | Owner archives |
+| archived | draft | Owner restores for editing and fresh review |
 
-All other transitions are denied. Sold listings must be archived and restored before resubmission. Administrators who also sell cannot moderate their own cars.
+Deny every other transition. Sold cars must be archived/restored before resubmission. Administrators cannot moderate their own listings. Draft/rejected edits retain their status until submission.
 
-Substantive changes include specifications, price, location, description, photo additions/removals/order, and cover selection. Save these changes and the resulting status together. Invalid edits must leave the existing listing unchanged. Editing a draft or rejected listing retains its current status until submission.
+Substantive changes include specifications, price, location, description, photos, display order, and cover selection. Save changes, status, version, and audit events atomically. Invalid edits leave the previous listing intact. Use expected versions and row locks to reject stale edits/decisions.
 
-Use a version field and conditional updates inside transactions to reject stale edits or stale moderation decisions. Inquiry creation must atomically verify that the listing is still published, including when a sale or moderation action happens concurrently. Define and test this behavior on both databases.
+Inquiry creation must lock/check the same listing row as lifecycle commands, require published status, enforce limits, and insert in one transaction. A concurrent sale and inquiry are ordered by these transactions. RLS is an access boundary, not the state machine.
 
-Only `published` listings appear in public search, homepage results, and public detail queries. Owners and administrators use protected preview routes for other statuses. Media access must follow visibility rules; draft photos must not become public simply through predictable URLs. Invalidate affected public pages after changes and avoid shared caching of private data.
+Only published cars appear in public homepage, search, and details. Owners/administrators use protected previews for other states. Read availability from current database state; do not shared-cache private pages.
 
-## Pages and user experience
+## Pages and buyer experience
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Branded homepage, search entry, latest published cars |
-| `/cars` | Keyword search, filters, sort, paginated results |
-| `/cars/[id]` | Published car specifications, gallery, public seller details, inquiry and report actions |
-| `/register`, `/login`, `/forgot-password`, `/reset-password` | Account and recovery forms |
-| `/profile` | Profile editing and explicit contact publication controls |
-| `/favorites` | Saved cars; unavailable cars cannot receive inquiries |
-| `/dashboard` | Seller overview, listing statuses, received inquiry summary |
-| `/dashboard/listings/new` | Create draft |
-| `/dashboard/listings/[id]/edit` | Owner-only editing, photo management, lifecycle actions |
-| `/dashboard/listings/[id]` | Private listing preview and rejection feedback |
-| `/dashboard/inquiries` | Inquiries for the signed-in seller's cars |
-| `/admin/listings` | Review queue and moderation history |
-| `/admin/reports` | Report investigation and resolution |
+| `/` | Homepage, search entry, latest published cars |
+| `/cars` | Search/filter/sort/pagination |
+| `/cars/[id]` | Published details, photos, seller projection, inquiry/report |
+| `/register`, `/login` | Account entry |
+| `/forgot-password`, `/reset-password`, `/auth/confirm` | Recovery and confirmation |
+| `/profile`, `/favorites` | Profile/contact controls and saved cars |
+| `/dashboard` | Seller inventory and inquiry summary |
+| `/dashboard/listings/new` | Draft creation |
+| `/dashboard/listings/[id]` | Private preview and rejection feedback |
+| `/dashboard/listings/[id]/edit` | Owner editing, photos, lifecycle actions |
+| `/dashboard/inquiries` | Seller's received inquiries |
+| `/admin/listings`, `/admin/reports` | Review and report queues |
 
-Search uses URL query parameters for keyword, make, model, year range, price range, mileage ceiling, transmission, fuel, condition, and location. Search make/model/description/location with parameterized queries. Start with portable case-normalized matching; no external search engine is required. Whitelist sort options: newest, price ascending/descending, year descending, and mileage ascending. Use stable ID tie-breakers, 12 results per page, validated bounds, and preserved filters during pagination.
+Search parameters live in the URL: keyword, make/model, year/price ranges, mileage ceiling, transmission, fuel, condition, and location. Use parameterized PostgreSQL queries/RPC with bounded inputs, case-insensitive matching, and escaped wildcard handling. Never concatenate raw user text into SQL or Supabase filter expressions.
 
-Use a shared header, footer, buttons, fields, status badges, and listing cards. Provide visible labels, keyboard focus, error summaries and inline errors, useful no-results guidance, responsive galleries, and accessible confirmation forms. Show pending feedback for mutations and prevent accidental repeat submissions without relying on the UI for uniqueness.
+Whitelist newest, price ascending/descending, year descending, and mileage ascending sorts. Use stable ID tie-breakers, 12 results per page, validated ranges, and preserved filters. No external search engine is needed initially.
 
-## Validation, privacy, and spam controls
+Share navigation, cards, buttons, typography, fields, and status badges. Include visible labels, keyboard focus, inline errors and summaries, useful empty states, pending feedback, responsive galleries, and clear archive/sold confirmations. Prevent duplicate mutations on the server.
 
-- Require complete vehicle fields for submission; validate year against a reasonable configured lower bound and next model year, positive price, nonnegative mileage, bounded text, and known enum values.
-- Allow up to 10 photos per listing, 5 MB each, with a decoded pixel limit. Accept JPEG, PNG, and WebP only after inspecting actual bytes and decoding. Re-encode with random filenames, strip metadata, and reject SVG, corrupt files, and oversized images. Support one selected cover and deterministic fallback on cover deletion.
-- Stage uploads before attaching them transactionally; clean up abandoned files and retain original referenced files until a successful replacement. Enforce request limits at the upload endpoint and deployment proxy. Keep uploads outside the static public directory.
-- Require sign-in for favorites, inquiries, and reports. Buyers cannot inquire about their own cars or about unavailable listings. Seller inbox queries must be scoped to the current owner.
-- Keep account email, phone, reset tokens, and internal moderation notes private. Publish only explicitly opted-in contact fields. Inquiries remain useful without publicly exposing either party's contact details.
-- Use secure, HTTP-only session cookies, origin/CSRF protection, reset token expiry and single use, generic account-recovery responses, and server-side role checks. Revoke relevant sessions after password resets.
-- Add honeypots, message length limits, duplicate detection, and configurable account/IP rate limits. Initial limits: inquiries 5 per hour per account and 1 per listing per 10 minutes; reports 5 per day per account and one open report per listing. Add IP limits with trusted-proxy configuration and database-backed counters shared across instances.
-- Apply authentication/reset throttling as well. Return understandable validation or retry feedback; avoid logging message bodies, passwords, tokens, or private contact values.
+## Validation, images, privacy, and spam
+
+- Validate required fields at submission: reasonable year range, positive price, nonnegative mileage, known enum values, and bounded text.
+- Allow 10 photos per listing, 5 MB each, with a decoded pixel limit. Decode actual JPEG/PNG/WebP bytes, normalize with Sharp, strip metadata, and reject corrupt files/SVG. Use random object names.
+- Upload through a bounded Node.js handler. Check ownership, validate bytes, stage a private object, then attach metadata with an authorized database command. Storage and database writes are not one transaction: use staging records, retry-safe attachment, and delayed orphan cleanup. Keep the prior image until replacement succeeds.
+- Deny public bucket access and unrestricted browser uploads. Initial media delivery checks current publication or owner/admin access in Next.js, then streams through an isolated Storage client. Use private/no-store responses and bypass shared image optimization. Avoid long-lived signed URLs, which remain usable until expiry after a status change. Previously downloaded images cannot be recalled.
+- Public profiles include only explicitly opted-in contact values. Private email, phone, message bodies, and internal notes must not leak through HTML, props, or API projections.
+- Require sign-in for favorites; require confirmed, signed-in accounts for inquiries/reports. Block self-inquiries and unavailable-listing inquiries.
+- Add honeypots, length limits, duplicates checks, and database-enforced account limits: initially 5 inquiries/hour and 1 per listing/10 minutes; 5 reports/day and one open report per listing.
+- Account limits belong inside RPC functions so direct API calls cannot bypass them. Add separate trusted-IP limits at Next.js ingress/actions; never trust an IP argument supplied by an RPC caller. Configure Supabase Auth throttling because Next.js limits do not cover direct Auth calls.
+- Configure production SMTP, confirmation/reset templates, allowed redirects, and generic recovery responses. Never log credentials, cookies, reset links, contact details, or inquiry bodies.
+
+## Infrastructure and deployment
+
+Start with one Next.js container on a managed host and a hosted Supabase project. Use a separate hosted project for staging and locate web hosting near the Supabase region. Supabase does not host the Next.js application in this plan.
+
+```mermaid
+flowchart TD
+    Users[Users / administrators] --> Ingress[Domain and managed HTTPS ingress]
+    Ingress --> Next[Next.js web container]
+    Next --> API[Supabase HTTPS APIs]
+    API --> Auth[Auth]
+    API --> DB[(PostgreSQL / RLS / RPC)]
+    API --> Storage[Private Storage]
+    Auth --> SMTP[Custom SMTP provider]
+    Scheduler[Host scheduler] --> Job[Maintenance job]
+    Job --> API
+    Next --> Monitor[Logs / metrics / alerts]
+    Job --> Monitor
+    DB --> DBBackup[Database backup / PITR]
+    Storage --> ObjectBackup[Separate object backup]
+```
+
+| Environment | Application | Backend | Email |
+| --- | --- | --- | --- |
+| Local | Native `npm run dev` | CLI-managed local Supabase in Docker | Local mail capture |
+| CI | Disposable build/test processes | Disposable local Supabase | Local/fake mail |
+| Staging | Production-format container/HTTPS | Separate hosted Supabase project | Restricted test recipients |
+| Production | Approved container/HTTPS | Hosted production Supabase project | Verified custom SMTP sender |
+
+Isolate credentials, users, and storage between environments. Preview deployments must not use production data. Never expose local Studio publicly or treat the CLI development stack as production hosting.
+
+### Runtime and configuration
+
+- Build a pinned multi-stage, non-root Docker image with Next.js standalone output and copied static assets. Use resource limits, graceful shutdown, and readiness-based routing. The web filesystem is disposable.
+- Managed ingress provides TLS, request/upload limits, and trusted-proxy configuration. Normal application traffic uses HTTPS Supabase APIs with user context; direct PostgreSQL credentials are limited to migration/maintenance jobs that need them.
+- Provide non-sensitive liveness/readiness endpoints. Monitor database/Auth/Storage separately and do not restart healthy processes solely for SMTP outages.
+- Package admin/migration/cleanup tools explicitly; standalone web output may omit their dependencies. Run short-lived scheduled cleanup jobs with leases and retry-safe batches. No permanent worker or queue is required initially.
+- Store privileged keys in host/CI secrets. Configure hosted Auth SMTP and redirects in Supabase; they are not automatically configured by Next.js environment variables.
+- Prefer server-only runtime Supabase URL/publishable-key configuration initially so an image can be promoted across environments. If browser clients become necessary, explicitly inject public runtime configuration or build environment-specific artifacts; `NEXT_PUBLIC_` values are build-time values.
+- Before adding replicas, use identical images, coordinate Server Action encryption keys/deployment IDs, and test old browser submissions. Add shared caches only with coordinated invalidation. See [Next.js self-hosting guidance](https://nextjs.org/docs/app/guides/self-hosting).
+
+### CI/CD and release sequence
+
+1. **Pull request:** install locked dependencies, lint/typecheck, start disposable Supabase, apply migrations, validate generated types, run unit/RLS/integration/browser tests, and build. Test anonymous, seller A, seller B, and administrator access through direct APIs. Untrusted PRs receive no hosted secrets.
+2. **Artifact:** build and scan an immutable image tagged by commit, publish to a registry, and record its digest. Embed no privileged project credentials.
+3. **Staging schema/config:** explicitly select staging, review pending SQL, and run migrations once. Reconcile private buckets, Auth redirects/templates, and SMTP separately; migrations do not capture all hosted settings.
+4. **Staging rollout:** deploy, wait for readiness, and test accounts, recovery, uploads, approval, search, inquiry, sold visibility, reports, and direct API restrictions.
+5. **Production gate:** review staging results, exact target project, migration compatibility, backup health, and previous image. Actual deployment requires a separate authorized release task.
+6. **Release:** apply additive migrations under a deployment lock, reconcile configuration, deploy the tested image, switch traffic, and drain the previous instance. Do not migrate from every replica or seed production during releases.
+7. **Verify:** inspect access controls, redirects, storage, errors, and latency. Record image/schema versions and outcome. Use a controlled account for any production mutation.
+
+Keep tables, constraints, SQL functions, grants, RLS, and indexes in versioned migrations. Capture reviewed emergency Dashboard changes back into source. Test fresh setup and upgrades. Use additive changes and backfills, removing old fields only after the rollback window. See [Supabase migration guidance](https://supabase.com/docs/guides/local-development/database-migrations).
+
+### Backups, rollback, and operations
+
+Keep the previous web image available and maintain compatible RPC signatures/schema during rollout. Roll back the image only when compatible. Do not automatically reverse migrations or access-control fixes; prefer a forward fix when reversal would lose data or reopen access.
+
+Select backup retention/PITR based on the chosen Supabase plan. Initial recovery targets are 1 hour RPO and 4 hours RTO, subject to cost and restore testing. **Database backups do not contain Storage object bytes.** Schedule separate recoverable object backups with manifests and retention aligned to database history. See [Supabase backup limitations](https://supabase.com/docs/guides/platform/backups).
+
+Rehearse database, Auth-related state, object, and configuration restoration into an isolated environment before launch. Verify photo references, user access, grants, and RLS before switching traffic. Align delayed deletion with backup retention and monitor backup failures.
+
+Capture request/release IDs, timings, and redacted error categories. Alert on sustained 5xx errors, API/database failures, reset delivery errors, failed uploads, cleanup failures, and backup failures. Monitor database/storage/egress quotas and host resources before scaling.
+
+Before deployment, provide the domain, container host/region, registry, separate Supabase projects, private buckets/policies, keys, redirect allowlists, SMTP sender/domain, backup destination, and alert recipients. No resources are provisioned by this plan.
 
 ## Staged implementation plan
 
-Each stage should be a reviewable change with focused tests. Stage completion requires working behavior, not just scaffolding.
+Each stage ends with a working, tested behavior and a reviewable change.
 
-### 1. Foundation
+### 1. Foundation and security
 
-- [ ] Scaffold Next.js and TypeScript in the repository root; pin runtime and dependencies.
-- [ ] Add lint, typecheck, test, build, and database scripts.
-- [ ] Establish both database adapters and reviewed initial migrations; disable implicit schema changes.
-- [ ] Integrate authentication, registration, logout, password reset, profile editing, and administrator role bootstrap.
-- [ ] Add validated environment configuration, `.env.example`, ignored secrets/generated files, shared layout, and error pages.
-- [ ] Verify account flows, private field handling, protected routes, and fresh migrations on SQLite and PostgreSQL.
+- [ ] Scaffold Next.js/TypeScript; pin runtime, Supabase CLI, packages, and lockfile.
+- [ ] Add local Supabase config, initial migrations, generated types, and validated environment settings.
+- [ ] Implement SSR authentication, email confirmation/recovery, profiles, and protected administrator membership.
+- [ ] Add RLS/grants and direct API tests before exposing tables.
+- [ ] Build shared layout, accessible forms/error states, test scripts, and CI skeleton.
 
-**Acceptance:** a user can register, sign in, reset a password through development mail, edit their profile, and sign out; a normal user cannot access administration or grant themselves a role.
+**Acceptance:** a user registers, confirms, signs in, recovers their password through local mail, and edits their own profile without accessing another user's private details or granting themselves administrator access.
 
 ### 2. Seller workflow
 
-- [ ] Add listings, photos, audit events, and numeric/database constraints.
-- [ ] Implement owner-scoped create/edit/preview, upload validation, photo ordering, and cover selection.
-- [ ] Centralize the transition table and substantive-change rules in domain services.
-- [ ] Build dashboard status filters, empty states, submit/archive/restore/sold actions, and rejection feedback.
-- [ ] Test ownership tampering, stale edits, all allowed/denied transitions, and malformed uploads.
+- [ ] Add listings, photos, audits, constraints, and transactional lifecycle functions.
+- [ ] Implement owner create/edit/preview, photo ordering/cover, submission/archive/restore/sold actions.
+- [ ] Add validated staged uploads and cleanup; prevent direct API bypasses.
+- [ ] Build dashboard, filters, rejection feedback, and empty states.
+- [ ] Test ownership, every transition, stale edits, malformed uploads, and atomic published edits.
 
-**Acceptance:** a seller manages only their own inventory, submits complete cars, and cannot publish directly; published edits remove the car from public availability pending review.
+**Acceptance:** sellers manage only their cars and cannot publish directly; substantive published edits remove availability until reviewed.
 
 ### 3. Buyer discovery
 
-- [ ] Build homepage, search results, car detail pages, gallery, and public seller projection.
-- [ ] Add validated keyword/filter queries, whitelisted sorting, stable pagination, and useful empty states.
-- [ ] Ensure all public queries and media access honor publication status; verify cache invalidation.
-- [ ] Test filter combinations, pagination boundaries, invalid inputs, and status visibility.
+- [ ] Build homepage, search, details, public seller projections, and gallery.
+- [ ] Implement bounded query filters, whitelisted sorting, stable pagination, and URL state.
+- [ ] Test public and media visibility for every status through Next.js and direct Supabase access.
+- [ ] Inspect mobile/desktop layouts and loading/error/empty states.
 
-**Acceptance:** visitors can discover only published cars, filters remain in the URL, and private contact fields are absent from returned HTML and browser data.
+**Acceptance:** visitors see only published cars and opted-in contacts; private data never enters public responses.
 
 ### 4. Interactions
 
-- [ ] Implement idempotent favorite add/remove and the saved listings page.
-- [ ] Add inquiry forms and the owner-scoped seller inbox.
-- [ ] Add reporting forms, rate limits, honeypots, and duplicate handling.
-- [ ] Test concurrent favorite creation, inquiry availability races, self-inquiries, inbox access, and spam controls.
+- [ ] Implement unique favorites and saved listings.
+- [ ] Add atomic inquiry checks, seller inbox, reports, and account rate limits.
+- [ ] Add trusted-IP limits, honeypots, duplicate handling, and feedback.
+- [ ] Test direct RPC bypass attempts, self-inquiries, availability races, favorites concurrency, and inbox isolation.
 
-**Acceptance:** signed-in buyers can save and inquire about available cars; duplicates and unavailable-car inquiries are blocked; sellers see only their own received inquiries.
+**Acceptance:** buyers can save and inquire about available cars; sellers see only their inquiries; duplicates and races preserve constraints.
 
-### 5. Moderation and release verification
+### 5. Moderation and release readiness
 
-- [ ] Build administrator review queue, protected previews, approval, rejection with reasons, and audit history.
-- [ ] Add report review, resolve/dismiss actions with resolution notes, and explicit listing-removal actions.
-- [ ] Enforce self-moderation restrictions and reject decisions based on stale listing versions.
-- [ ] Add deterministic sample data and a safe administrator creation command.
-- [ ] Run full checks, both database suites, production build, and browser inspection at mobile and desktop sizes.
-- [ ] Replace planned setup instructions with tested commands and record remaining limitations.
+- [ ] Build approval/rejection queues, report resolution, reasons, and history.
+- [ ] Test self-moderation denial, role changes, stale versions, and escalation attempts.
+- [ ] Add safe local seed/admin scripts, container/tools targets, deployment templates, and runbooks.
+- [ ] Run full checks, fresh/upgrade migrations, production build, and browser inspection.
+- [ ] Replace planned setup commands with verified instructions and document outstanding configuration.
 
-**Acceptance:** a car moves from draft through review to publication, a buyer sends an inquiry, the seller receives it and marks the car sold, and subsequent inquiries are denied. An administrator can separately resolve a report with an audit trail.
+**Acceptance:** a seller submits, another administrator approves, a buyer discovers/inquires, the seller receives the inquiry and marks sold, and new inquiries fail. Reports are resolved with an audit trail. Actual deployment remains a separate task.
 
 ## Verification plan
 
-Use unit tests for validation and transition rules, database integration tests for permissions and constraints, and browser tests for the end-to-end marketplace journey. Include direct forged action requests rather than only UI tests.
+Use unit tests for validation, database tests for transactions/constraints/RLS/grants, and browser tests for full workflows. Service-role-only tests do not demonstrate user permissions.
 
-Required coverage: ownership, administrator restrictions, every lifecycle transition, public visibility, contact privacy, favorite uniqueness, inquiry permissions and availability, report limits, search/filter behavior, image validation, password recovery, and session access.
+Cover ownership, all transitions, moderation, visibility, private contacts, duplicate favorites, inquiry availability/concurrency, report limits, search/filter/pagination, upload validation, recovery redirects, and sessions.
 
-Planned release commands are `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, and `npm run build`. Add explicit migration validation for both database dialects against fresh databases and upgrades from the previous schema. CI must fail on schema drift or pending uncommitted migrations.
+Planned scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:db`, `npm run test:e2e`, and `npm run build`. CI recreates only disposable local databases, checks generated types, and tests upgrade migrations.
 
-**Checks performed so far:** repository and README inspection only. Application tests, migrations, builds, and rendered-page checks cannot run until the application exists.
+**Checks performed:** documentation/repository inspection only. Application scripts, migrations, builds, and browser checks are not available yet.
 
-## Setup plan (not executable yet)
+## Local setup plan (not executable yet)
 
-Repository: `https://github.com/komradkat/AutoLinkx-v1.git`. The current local folder is `Autolink`; use an explicit clone destination to match it:
+Prerequisites: pinned supported Node.js, npm, Git, and a Docker-compatible runtime. The foundation stage adds project-local Supabase CLI/configuration. Local Supabase supplies PostgreSQL, Auth, and Storage; see [local development documentation](https://supabase.com/docs/guides/local-development).
+
+Use the actual repository with an explicit destination matching this workspace:
 
 ```sh
 git clone https://github.com/komradkat/AutoLinkx-v1.git Autolink
 cd Autolink
 ```
 
-The foundation stage will add the files and scripts needed for the following workflow. These commands are a target contract, not currently available scripts:
+Target workflow after implementation:
 
 ```sh
 npm ci
-# Copy .env.example to .env and fill in local values.
-npm run db:migrate
-npm run admin:create
-npm run db:seed
+npx supabase start
+# Copy .env.example to .env.local and fill in local Supabase values.
+npm run db:migrate:local
+npm run db:types
+npm run admin:create:local
+npm run db:seed:local
 npm run dev
 ```
 
-Document the exact supported Node.js version from the implemented Next.js version in `package.json` and a runtime version file. Python and Django will not be required.
+The local migration wrapper must preserve data and explicitly target local Supabase. Database resets are reserved for disposable tests or explicitly requested local resets, never routine startup. Remote migration scripts must have separate names and explicit project targets.
 
-The planned `.env.example` will contain placeholders for `NODE_ENV`, `APP_URL`, `DATABASE_DIALECT`, `DATABASE_URL`, `BETTER_AUTH_SECRET`, SMTP settings, storage settings, and marketplace currency. Validate configuration at startup. Never expose secrets through `NEXT_PUBLIC_` variables or commit populated environment files.
+Planned environment placeholders: `APP_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, server-only `SUPABASE_SECRET_KEY`, bucket name, currency, and log level. Release jobs separately receive project reference, CLI credentials, and migration credentials. Do not commit or print keys; only publishable configuration may reach the browser.
 
-Sample data will require a migrated development database. The seed command must be repeatable, use fictional users and locally generated placeholder photos, create examples across listing statuses, and refuse production by default. It must not overwrite real users or listings or ship a fixed usable administrator password. Administrator creation should be an explicit local command with secure input.
+Sample data needs migrated local Auth/Storage and private buckets. A repeatable script creates fictional accounts through the Auth admin API, placeholder photos, and varied listing statuses. It refuses non-local endpoints by default and does not overwrite real accounts/data. Administrator creation uses explicit secure input and no fixed shipped password. Hosted SMTP and project configuration are not supplied by local seed data.
 
 ## Planned source tree
 
-Only `README.md` exists today; the following is the target tree. Generated output, uploads, local databases, and dependency folders are excluded.
+Only this README is implemented. Target tree excludes generated output, dependencies, local databases, and uploaded files.
 
 ```text
 Autolink/
@@ -248,33 +341,36 @@ Autolink/
   package-lock.json
   .env.example
   next.config.ts
+  Dockerfile
+  .dockerignore
+  .github/workflows/       # Checks and gated releases
   src/
-    app/                 # App Router pages, actions, and focused route handlers
-    components/          # Shared accessible UI
+    app/                  # Pages, actions, auth and media handlers
+    components/           # Shared accessible UI
     features/
-      accounts/          # Profile services and auth integration
-      listings/          # Schemas, queries, ownership, lifecycle, photos
-      interactions/      # Favorites, inquiries, reports
-      moderation/        # Review services and audit queries
+      accounts/
+      listings/
+      interactions/
+      moderation/
     server/
-      auth/              # Session configuration and authorization helpers
-      db/                # Dialect adapters and schemas
-      storage/           # Local and production media adapters
-      mail/              # Development and SMTP delivery
-      config/            # Validated environment settings
-      security/          # Rate limits and request protections
-  migrations/
-    sqlite/
-    postgres/
-  scripts/               # Migrations, administrator creation, sample data
-  tests/                 # Unit, integration, and browser tests
-  public/                # Branding and static assets only
+      supabase/           # Request client; isolated privileged client
+      auth/               # Verified identity and permission helpers
+      storage/            # Validation, staging, attachment, delivery
+      config/
+      security/
+  supabase/
+    config.toml           # Local services, Auth, Storage configuration
+    migrations/           # Tables, functions, grants, RLS, indexes
+    tests/                # Database permissions and transaction tests
+  scripts/                # Types, migrations, local seed/admin, cleanup
+  tests/                  # Unit, integration, browser tests
+  infra/                  # Hosting/release templates
+  docs/runbooks/          # Deploy, rollback, backup, restore, incidents
+  public/                 # Static branding; no vehicle uploads
 ```
 
-## Production preparation
+## Remaining decisions and limitations
 
-Use a Node.js server runtime with PostgreSQL, HTTPS, secure cookies, explicit trusted origins/proxy configuration, and production error handling. Provide SMTP delivery for password resets and durable media storage; local disk needs a persistent volume, while multiple instances need shared/object storage. Do not rely on ephemeral server files or process-local sessions/rate limits.
+Choose the host/region, Supabase plan, SMTP provider, backup retention/destination, and marketplace currency before launch. Validate cost, limits, and recovery targets against those choices. Pin supported runtime/package versions when installing; none are currently installed by this project.
 
-Run reviewed migrations as a controlled release step, take database and media backups, and verify restoration. Preserve existing data in future migrations through additive changes and explicit backfills. Configure request/upload limits, security headers, logs without secrets, and expiry/orphan-file cleanup. Configure the image host allowlist if using remote optimized images.
-
-Hosting, domain, SMTP credentials, storage credentials, database provisioning, and deployment remain configuration work. **Deployment is not part of this task.**
+Local development now requires Docker/PostgreSQL instead of SQLite. Supabase reduces separately operated services but introduces dependencies on its Auth/Storage APIs and RLS model. Keep those explicit through isolated clients, versioned SQL, and tested recovery procedures. The Supabase Dashboard is an infrastructure tool, not the marketplace moderation interface.
