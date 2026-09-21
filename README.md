@@ -2,9 +2,11 @@
 
 AutoLinkX is a planned car marketplace where sellers list vehicles, buyers discover cars and contact sellers, and administrators moderate listings. One account can both buy and sell.
 
+Read the [MVP product document](MVP.md) for the first-release scope, user journeys, milestones, and acceptance criteria. This README provides the supporting technical and deployment plan.
+
 ## Current status
 
-**Planning only.** This repository contains this README, with no application code, dependencies, migrations, or tests. The initial inspection found no existing Django application or `AGENTS.md`. No application tests or deployments have been performed.
+**MVP documentation; application not implemented.** The initial inspection found no existing Django application or `AGENTS.md`. Preliminary package, Next.js, TypeScript, environment, and Supabase configuration files were created before the task was clarified as documentation. They are unverified scaffolding, not a runnable MVP; there are no implemented pages, migrations, or tests. No application tests or deployments have been performed.
 
 The agreed stack is **Next.js + Supabase**. Next.js provides the website and business workflows; Supabase provides Auth, PostgreSQL, and Storage. We will build a custom moderation dashboard.
 
@@ -332,11 +334,12 @@ Sample data needs migrated local Auth/Storage and private buckets. A repeatable 
 
 ## Planned source tree
 
-Only this README is implemented. Target tree excludes generated output, dependencies, local databases, and uploaded files.
+The MVP document and this README define the plan; preliminary configuration files are unverified scaffolding. The target tree excludes generated output, dependencies, local databases, and uploaded files.
 
 ```text
 Autolink/
   README.md
+  MVP.md
   package.json
   package-lock.json
   .env.example
