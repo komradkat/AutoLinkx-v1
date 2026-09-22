@@ -74,6 +74,20 @@ flowchart TD
 
 Keep accounts, listings, interactions, moderation, and infrastructure as folders inside one application. Pages/actions parse requests and call services. TypeScript services validate inputs; database functions own atomic mutations and security invariants. Several independent Supabase API requests are not a database transaction.
 
+### Why one application and not microservices
+
+AutoLinkX is a modular monolith: one deployable Next.js application, separated by feature folder rather than by service, on top of Supabase's managed Auth, PostgreSQL, and Storage. Splitting it into independently deployed services would remove guarantees this MVP is built on and add work that nothing here needs.
+
+- **The core writes are one transaction.** Submitting a listing saves details, status, version, and an audit event together; approving or rejecting does the same; creating an inquiry locks the listing row while it checks availability and account limits. In one database that is a single atomic statement. Across services it becomes a distributed saga with hand-written compensating actions, and a half-applied submission is a state a user can reach.
+- **Authorization lives in one place.** Row-level security, grants, and controlled functions decide who may read or change a row, and they hold even when someone calls the Supabase API directly. With several services, each one reimplements those checks; a single omission is a data leak rather than a denied query.
+- **Read paths join.** Search composes listings, photos, and the opted-in seller projection in one query. Separate stores would need API composition on every request or a duplicated read model to keep in sync.
+- **The team is two people on one release cadence.** Independent deployment is the problem microservices solve; it is not a problem here. The coordination cost is real, the benefit is not.
+- **The operational cost is per service.** Separate pipelines, secrets, tracing, retries, and idempotency handling — currently for a project whose CI has not yet run once.
+
+The parts that genuinely benefit from isolation are CPU-bound or scheduled, not user-facing: image decoding and normalization, and the maintenance cleanup job. Both are planned as **background workers in this repository, against this database** (A-10 already stages uploads outside the attachment transaction, and A-22 leases cleanup batches), which gives the isolation without giving up transactions or a single authorization boundary.
+
+Revisit this only when a separate team owns a bounded area, or when one part needs a different scaling or availability profile than the rest. Feature folders and `src/contracts/` keep that seam available; taking it early would cost correctness the [MVP acceptance checklist](MVP.md#11-mvp-acceptance-and-release-gate) depends on.
+
 ## Authentication and security boundaries
 
 Use request-scoped server clients carrying the user's session. Follow Supabase's SSR cookie and token-refresh integration for the pinned Next.js release. Verify identity using the supported verified-claims/user APIs; do not trust an unverified cookie or `getSession()` result. Restrict confirmation/recovery redirects to allowed application destinations. See [Supabase SSR guidance](https://supabase.com/docs/guides/auth/server-side/creating-a-client).
