@@ -88,3 +88,35 @@ export async function deleteActors(...actors: Actor[]): Promise<void> {
     await admin.auth.admin.deleteUser(actor.id);
   }
 }
+
+/** A cookie jar standing in for one browser across several requests. */
+export function cookieJar() {
+  const jar = new Map<string, string>();
+  return {
+    getAll: () => [...jar.entries()].map(([name, value]) => ({ name, value })),
+    setAll: (cookies: { name: string; value: string }[]) => {
+      for (const { name, value } of cookies) {
+        if (value === '') jar.delete(name);
+        else jar.set(name, value);
+      }
+    },
+  };
+}
+
+/** Reads the most recent message the local mail catcher received. */
+export async function latestEmail(): Promise<{ to: string; body: string } | null> {
+  const base = 'http://127.0.0.1:54424';
+  const list = await fetch(`${base}/api/v1/messages?limit=1`).then((r) => r.json());
+  const summary = list.messages?.[0];
+  if (!summary) return null;
+
+  const message = await fetch(`${base}/api/v1/message/${summary.ID}`).then((r) => r.json());
+  return {
+    to: summary.To?.[0]?.Address ?? '',
+    body: `${message.Text ?? ''}\n${message.HTML ?? ''}`,
+  };
+}
+
+export async function clearMailbox(): Promise<void> {
+  await fetch('http://127.0.0.1:54424/api/v1/messages', { method: 'DELETE' });
+}
