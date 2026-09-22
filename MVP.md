@@ -4,6 +4,8 @@ Status: proposed implementation scope, not a completed application.
 Stack: Next.js, TypeScript, Supabase Auth, PostgreSQL, and Storage.  
 Companion: [technical architecture and infrastructure plan](README.md).
 
+Execution: [two-developer TODO board](TODO.md) with separate ownership and integration checkpoints.
+
 ## 1. Objective
 
 Help an individual seller publish a trustworthy car listing and a buyer find that car and send an inquiry. An administrator reviews listings before they become public.

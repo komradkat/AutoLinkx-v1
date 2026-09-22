@@ -4,6 +4,12 @@ AutoLinkX is a planned car marketplace where sellers list vehicles, buyers disco
 
 Read the [MVP product document](MVP.md) for the first-release scope, user journeys, milestones, and acceptance criteria. This README provides the supporting technical and deployment plan.
 
+Use the [two-developer TODO board](TODO.md) for task ownership, file boundaries, dependencies, and integration checkpoints.
+
+Your backend/platform work is expanded in the [Developer A detailed checklist](TODO-DEVELOPER-A.md).
+
+Coding assistants should read [AGENTS.md](AGENTS.md) for repository-wide architecture, ownership, security, and verification rules.
+
 ## Current status
 
 **MVP documentation; application not implemented.** The initial inspection found no existing Django application or `AGENTS.md`. Preliminary package, Next.js, TypeScript, environment, and Supabase configuration files were created before the task was clarified as documentation. They are unverified scaffolding, not a runnable MVP; there are no implemented pages, migrations, or tests. No application tests or deployments have been performed.

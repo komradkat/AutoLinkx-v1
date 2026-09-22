@@ -2,6 +2,8 @@
 
 Scope: [MVP.md](MVP.md). Technical reference: [README.md](README.md).
 
+Developer A: use [your detailed checklist](TODO-DEVELOPER-A.md) for the implementation steps, tests, and handoffs behind A-01 through A-24.
+
 This is an implementation work allocation, not a record of completed features. All tasks begin unchecked. Existing scaffold files must be inspected and verified before reuse.
 
 ## Ownership
