@@ -12,7 +12,7 @@ Coding assistants should read [AGENTS.md](AGENTS.md) for repository-wide archite
 
 ## Current status
 
-**Foundation only; no marketplace feature is implemented.** Tasks A-01 to A-04 verified the scaffold, published the frontend/backend contract, brought up local Supabase with a baseline migration, and wired request-scoped Supabase clients with verified identity. The toolchain installs, lints, type-checks, tests, builds, and serves a placeholder page. A signed-in session is recognised and refreshed, but there are still no application tables, no account screens or actions, and no product pages; administrator membership fails closed until A-05. Nothing has been deployed.
+**Foundation only; no marketplace feature is implemented.** Tasks A-01 to A-04 verified the scaffold, published the frontend/backend contract, brought up local Supabase with a baseline migration, and wired request-scoped Supabase clients with verified identity. The toolchain installs, lints, type-checks, tests and builds, and the app serves a real shell built from the design references. A signed-in session is recognised, refreshed, and shown in the header, but there are still no application tables, no account screens or actions, and no car listings anywhere; administrator membership fails closed until A-05. Nothing has been deployed.
 
 The agreed stack is **Next.js + Supabase**. Next.js provides the website and business workflows; Supabase provides Auth, PostgreSQL, and Storage. We will build a custom moderation dashboard.
 
