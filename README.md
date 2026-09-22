@@ -317,7 +317,10 @@ If `npm run typecheck` reports errors inside `.next/`, delete that directory: `n
 
 ## Local setup
 
-Working today, from a clean checkout (Node.js 24 — see `.nvmrc`):
+**Step-by-step guide: [docs/running-locally.md](docs/running-locally.md)** — prerequisites,
+the account journey to walk through, and what to do when something breaks.
+
+The short version, from a clean checkout (Node.js 24 — see `.nvmrc`):
 
 ```sh
 npm ci

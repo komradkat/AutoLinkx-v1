@@ -13,6 +13,7 @@ import Link from 'next/link';
 
 import type { Viewer } from '@/contracts';
 import { AUTH_ROUTES } from '@/contracts';
+import { logoutAction } from '@/features/accounts/actions';
 
 function initials(displayName: string): string {
   const parts = displayName.trim().split(/\s+/).slice(0, 2);
@@ -48,6 +49,9 @@ function AccountArea({ viewer }: { viewer: Viewer }) {
       <Link className="account-nav__link" href="/dashboard/inquiries">
         Inquiries
       </Link>
+      <Link className="account-nav__link" href="/profile">
+        Profile
+      </Link>
       <span className="account-nav__identity">
         <span className="avatar" aria-hidden="true">
           {initials(viewer.displayName)}
@@ -59,6 +63,11 @@ function AccountArea({ viewer }: { viewer: Viewer }) {
           )}
         </span>
       </span>
+      <form action={logoutAction}>
+        <button className="button button--quiet" type="submit">
+          Sign out
+        </button>
+      </form>
     </nav>
   );
 }
