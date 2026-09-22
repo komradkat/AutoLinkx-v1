@@ -13,7 +13,7 @@ const valid: EnvSource = {
   APP_URL: 'http://localhost:3000',
   SUPABASE_URL: 'http://127.0.0.1:54321',
   SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_local',
-  MARKETPLACE_CURRENCY: 'EUR',
+  MARKETPLACE_CURRENCY: 'PHP',
   LISTING_PHOTOS_BUCKET: 'listing-photos',
   LOG_LEVEL: 'info',
 };
@@ -22,7 +22,7 @@ describe('public configuration', () => {
   it('parses a complete environment', () => {
     expect(getPublicConfig(valid)).toMatchObject({
       APP_URL: 'http://localhost:3000',
-      MARKETPLACE_CURRENCY: 'EUR',
+      MARKETPLACE_CURRENCY: 'PHP',
       LOG_LEVEL: 'info',
     });
   });

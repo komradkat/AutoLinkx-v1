@@ -12,7 +12,7 @@ Coding assistants should read [AGENTS.md](AGENTS.md) for repository-wide archite
 
 ## Current status
 
-**Foundation only; no marketplace feature is implemented.** Tasks A-01 to A-04 verified the scaffold, published the frontend/backend contract, brought up local Supabase with a baseline migration, and wired request-scoped Supabase clients with verified identity. The toolchain installs, lints, type-checks, tests, builds, and serves a placeholder page. A signed-in session is recognised and refreshed, but there are still no application tables, no account screens or actions, and no product pages; administrator membership fails closed until A-05. Nothing has been deployed.
+**Foundation only; no marketplace feature is implemented.** Tasks A-01 to A-04 verified the scaffold, published the frontend/backend contract, brought up local Supabase with a baseline migration, and wired request-scoped Supabase clients with verified identity. The toolchain installs, lints, type-checks, tests and builds, and the app serves a real shell built from the design references. A signed-in session is recognised, refreshed, and shown in the header, but there are still no application tables, no account screens or actions, and no car listings anywhere; administrator membership fails closed until A-05. Nothing has been deployed.
 
 The agreed stack is **Next.js + Supabase**. Next.js provides the website and business workflows; Supabase provides Auth, PostgreSQL, and Storage. We will build a custom moderation dashboard.
 
@@ -26,6 +26,7 @@ This replaces the earlier Better Auth, ORM, and dual-database proposal. **Use lo
 - **A-02:** verified toolchain — committed lockfile, pinned Node.js 24, ESLint flat config, working `dev`/`lint`/`typecheck`/`test`/`build`, and a GitHub Actions workflow running those four checks.
 - **A-03:** local Supabase on offset ports, a baseline migration establishing the private schema and grant hygiene, startup configuration validation, and generated database types. No application tables yet.
 - **A-04:** request-scoped Supabase clients, session refresh in `src/proxy.ts`, verified-identity helpers returning the shared `Viewer` DTO, and an isolated privileged client. Administrator membership fails closed until A-05.
+- **Shell (part of B-02/B-04, built by A):** design tokens, responsive header and footer, homepage shell and not-found screen from `Ui design/`. The header shows the real verified viewer. Search, listing counts and car cards are deliberately absent until listings exist.
 
 ### Planned first release
 
@@ -330,7 +331,10 @@ If `npm run typecheck` reports errors inside `.next/`, delete that directory: `n
 
 ## Local setup
 
-Working today, from a clean checkout (Node.js 24 — see `.nvmrc`):
+**Step-by-step guide: [docs/running-locally.md](docs/running-locally.md)** — prerequisites,
+the account journey to walk through, and what to do when something breaks.
+
+The short version, from a clean checkout (Node.js 24 — see `.nvmrc`):
 
 ```sh
 npm ci

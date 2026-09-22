@@ -69,12 +69,14 @@ Changes to a published contract need a small joint review and updates to fixture
 
 ### B — Other developer's TODOs
 
-- [ ] **B-02:** Build design tokens, typography, responsive header/footer, buttons, inputs, status badges, and listing-card component.
+- [ ] **B-02:** Build design tokens, typography, responsive header/footer, buttons, inputs, status badges, and listing-card component. *(**Partly delivered by A** on `dev-a/A-04-supabase-clients-identity`, with the user's agreement: design tokens, typography, responsive header and footer, and button and status-badge styles now exist in `src/app/globals.css` and `src/components/`, taken from `Ui design/`. **Still B's:** form inputs, the listing-card component, and any rework of the token set. Replace freely; keep identity as a server-passed prop.)*
 - [ ] **B-03:** Build registration/login/confirmation/recovery/profile screens against A-01 contracts.
-- [ ] **B-04:** Add app loading/error/not-found states, pending forms, inline errors, and keyboard focus behavior.
+- [ ] **B-04:** Add app loading/error/not-found states, pending forms, inline errors, and keyboard focus behavior. *(**Partly delivered by A:** `src/app/not-found.tsx` plus the skip link and the visible focus ring in `globals.css`. **Still B's:** `loading.tsx` and `error.tsx` boundaries, pending-form feedback, and inline error presentation.)*
 - [ ] **B-05:** Connect account screens to A-06; test confirmation, recovery, logout, and private contact preferences in a browser.
 
-**Can run in parallel:** B-01 through B-04 can use fixtures while A prepares Supabase.  
+**Can run in parallel:** B-01 through B-04 can use fixtures while A prepares Supabase.
+
+**Shell already built (A, 2026-09-22).** The app has a working header, footer, homepage shell and not-found screen from the design references, and the header renders the real verified viewer. It replaced A's earlier scaffold placeholder. B owns all of it from B-02 onward; the deliberate omissions are the search form, the listing count and the Latest cars grid, which need listing tables (A-08, A-12). No screen anywhere shows invented data.  
 **Gate G1:** both developers can start the app from a clean checkout; account flows work against local Supabase; private contacts and administrator membership are protected. Merge the foundation before feature branches build on it.
 
 ## Stage 2 — Seller workflow
