@@ -1,0 +1,12 @@
+<!--
+  Password recovery email (A-06). Same reasoning as the confirmation template:
+  a token hash aimed at the application's own route, not a device-bound flow.
+-->
+<h2>Choose a new AutoLinkX password</h2>
+<p>Open the link below to choose a new password. It expires shortly.</p>
+<p>
+  <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password">
+    Choose a new password
+  </a>
+</p>
+<p>If you did not ask for this, you can ignore this message; your password stays unchanged.</p>

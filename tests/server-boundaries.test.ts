@@ -24,7 +24,7 @@ function sourceFiles(dir: string): string[] {
 const GENERATED = new Set(['src/server/database.types.ts']);
 const serverFiles = sourceFiles('src/server').filter((file) => !GENERATED.has(file));
 const contractFiles = sourceFiles('src/contracts');
-const uiFiles = [...sourceFiles('src/app'), ...sourceFiles('src/components')];
+const uiFiles = [...sourceFiles('src/app'), ...sourceFiles('src/components'), ...sourceFiles('src/features')];
 
 function read(path: string): string {
   return readFileSync(join(repoRoot, path), 'utf8');
