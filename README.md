@@ -12,7 +12,7 @@ Coding assistants should read [AGENTS.md](AGENTS.md) for repository-wide archite
 
 ## Current status
 
-**Toolchain, contracts, and local database only; no marketplace feature is implemented.** Tasks A-01 to A-03 verified the scaffold, published the frontend/backend contract, and brought up local Supabase with a baseline migration. The toolchain installs, lints, type-checks, tests, builds, and serves a placeholder page from a clean checkout. There are still no application tables, no Supabase clients, no account flows, and no product pages; the tests cover the contract modules and configuration validation, nothing else. Nothing has been deployed.
+**Foundation only; no marketplace feature is implemented.** Tasks A-01 to A-04 verified the scaffold, published the frontend/backend contract, brought up local Supabase with a baseline migration, and wired request-scoped Supabase clients with verified identity. The toolchain installs, lints, type-checks, tests, builds, and serves a placeholder page. A signed-in session is recognised and refreshed, but there are still no application tables, no account screens or actions, and no product pages; administrator membership fails closed until A-05. Nothing has been deployed.
 
 The agreed stack is **Next.js + Supabase**. Next.js provides the website and business workflows; Supabase provides Auth, PostgreSQL, and Storage. We will build a custom moderation dashboard.
 
@@ -25,6 +25,7 @@ This replaces the earlier Better Auth, ORM, and dual-database proposal. **Use lo
 - **A-01:** shared frontend/backend contract in `src/contracts/` and [docs/contracts.md](docs/contracts.md), with tests tying the listing lifecycle to MVP.md. Proposed interfaces only; no service implements them.
 - **A-02:** verified toolchain — committed lockfile, pinned Node.js 24, ESLint flat config, working `dev`/`lint`/`typecheck`/`test`/`build`, and a GitHub Actions workflow running those four checks.
 - **A-03:** local Supabase on offset ports, a baseline migration establishing the private schema and grant hygiene, startup configuration validation, and generated database types. No application tables yet.
+- **A-04:** request-scoped Supabase clients, session refresh in `src/proxy.ts`, verified-identity helpers returning the shared `Viewer` DTO, and an isolated privileged client. Administrator membership fails closed until A-05.
 
 ### Planned first release
 
@@ -309,7 +310,7 @@ Cover ownership, all transitions, moderation, visibility, private contacts, dupl
 
 Working scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run dev`. Not implemented yet: `npm run test:db` (no `supabase/tests/`), `npm run db:seed:local` (no `scripts/seed.mjs`), `npm run test:e2e`, `npm run db:types`, and `npm run admin:create:local`. CI recreates only disposable local databases, checks generated types, and tests upgrade migrations.
 
-**Checks performed (A-01 to A-03):** clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (41 unit tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers — all passing on Node.js 24.19.0 / npm 11.17.0 on Windows. Locally against Supabase CLI 2.117.0: the stack starts, the baseline migration applies to a fresh database, `anon` and `authenticated` hold no privileges on `app_private`, a later migration applied without losing existing rows, and `npm run db:types` regenerates cleanly. Not yet exercised: database/RLS permission tests with real user credentials, browser tests, container builds, and every hosted check.
+**Checks performed (A-01 to A-04):** clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (41 unit tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers — all passing on Node.js 24.19.0 / npm 11.17.0 on Windows. Locally against Supabase CLI 2.117.0: the stack starts, the baseline migration applies to a fresh database, `anon` and `authenticated` hold no privileges on `app_private`, a later migration applied without losing existing rows, and `npm run db:types` regenerates cleanly. Identity is additionally verified against the running local Auth server: sign-in lands in cookies, a later client rebuilt from those cookies sees the same user, tampered and malformed cookies degrade to anonymous, two sessions stay isolated, and auth cookie writes carry no-store headers. Not yet exercised: RLS permission tests (no tables yet), proxy-level token refresh with a real expiring session, browser tests, container builds, and every hosted check.
 
 If `npm run typecheck` reports errors inside `.next/`, delete that directory: `next dev` and `next build` write different route-type artifacts, and the stale set is type-checked too.
 
@@ -331,6 +332,12 @@ npm run db:migrate:local  # apply pending migrations, preserving data
 npm run db:types          # regenerate src/server/database.types.ts
 npx supabase stop         # containers down; volumes and data are kept
 ```
+
+**`.env.local` is now required to run the app.** Since A-04 the proxy builds a
+Supabase client on every request, and startup validation fails loudly rather
+than serving pages with half a configuration. Copy `.env.example` to
+`.env.local` and fill in the values `npx supabase status` prints. The file is
+git-ignored; never commit it.
 
 ### Local service locations
 

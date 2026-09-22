@@ -62,7 +62,7 @@ Changes to a published contract need a small joint review and updates to fixture
 
 - [x] **A-02:** Verify preliminary scaffold; pin compatible dependencies/runtime; provide working dev, typecheck, test, and build scripts. *(Merged to `main` in PR #1, merge commit `ad7a202`. CI exists but has never run: GitHub Actions is blocked by an account billing lock.)*
 - [ ] **A-03:** Configure local Supabase and data-preserving migrations; provide `.env.example` and reproducible startup steps. *(Done and locally verified on `dev-a/A-03-local-supabase-migrations`; awaiting review and merge.)*
-- [ ] **A-04:** Implement request-scoped Supabase clients, SSR token refresh, verified identity, and isolated privileged clients.
+- [ ] **A-04:** Implement request-scoped Supabase clients, SSR token refresh, verified identity, and isolated privileged clients. *(Done and locally verified on `dev-a/A-04-supabase-clients-identity`; awaiting review and merge.)*
 - [ ] **A-05:** Add profiles/private contacts/administrator membership, initialization, RLS, grants, and safe projections.
 - [ ] **A-06:** Implement register/confirm/login/logout/recovery/profile actions, safe redirects, and operator-only administrator bootstrap.
 - [ ] **A-07:** Test account permissions, profile isolation, role escalation denial, and recovery behavior; add baseline CI.
