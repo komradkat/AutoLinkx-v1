@@ -1,22 +1,25 @@
+# Ports are offset from the Supabase defaults (544xx instead of 543xx) so this
+# stack can run beside another local Supabase project on the same machine.
 project_id = "autolinkx"
 [api]
 enabled = true
-port = 54321
+port = 54421
 schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 [db]
-port = 54322
-shadow_port = 54320
+port = 54422
+shadow_port = 54420
 major_version = 17
 [db.seed]
 enabled = false
 [studio]
 enabled = true
-port = 54323
-[inbucket]
+port = 54423
+# Local mail capture (Mailpit). Replaces the deprecated [inbucket] section.
+[local_smtp]
 enabled = true
-port = 54324
+port = 54424
 [storage]
 enabled = true
 file_size_limit = "6MiB"

@@ -16,9 +16,9 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 - [x] Review current git status, existing scaffold, and any `AGENTS.md`; preserve unrelated changes.
 - [x] Claim A-01/A-02 and create a task branch from the agreed integration branch.
-- [ ] Publish initial contracts so B can build against stable shapes.
+- [x] Publish initial contracts so B can build against stable shapes.
 - [x] Verify the toolchain and share a clean-checkout startup command.
-- [ ] Start local Supabase and establish the first migration/test cycle.
+- [x] Start local Supabase and establish the first migration/test cycle.
 - [ ] Complete accounts and profile isolation before implementing listing mutations.
 
 ## Stage 1 — Foundation and accounts
@@ -39,7 +39,7 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Done when:** B can create typed fixtures and forms without guessing fields or receiving private data. Contract modules contain no server clients or secret configuration.
 
-**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-01-A-02-contracts-and-scaffold` (commit `9bc970e`); **not reviewed, not merged**. `src/contracts/**` and `docs/contracts.md` exist and are covered by 29 passing tests, including a check that the transition table still matches MVP.md section 6. Proposed interfaces only: no table, RPC, service, or handler implements them. Remaining: B's B-01 review of the five open questions at the end of `docs/contracts.md`, and a canonical list of action/query function names, which lands with A-06 and A-09.
+**Status (2026-09-22):** **merged to `main`** in PR #1 (merge commit `ad7a202`, contract commit `9bc970e`); **B's review still outstanding**. `src/contracts/**` and `docs/contracts.md` exist and are covered by 29 passing tests, including a check that the transition table still matches MVP.md section 6. Proposed interfaces only: no table, RPC, service, or handler implements them. Remaining: B's B-01 review of the five open questions at the end of `docs/contracts.md`, and a canonical list of action/query function names, which lands with A-06 and A-09.
 
 ### A-02 — Verify the scaffold and development toolchain
 
@@ -55,22 +55,24 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Done when:** the agreed shell starts and builds from a clean install, and B can reproduce the setup.
 
-**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-01-A-02-contracts-and-scaffold` (commits `33c939e`, `246c6a3`, `9fa208a`); **not reviewed, not merged**. Verified on Node.js 24.19.0 / npm 11.17.0: clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (29 tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers. `npm audit` reports no vulnerabilities after the sharp 0.35.4 bump. Remaining: agree the placeholder `src/app/layout.tsx` and `page.tsx` with B so B-02 replaces them, and merge. Still missing by design: `scripts/seed.mjs` and `supabase/tests/` for `db:seed:local` and `test:db`, plus `db:types`, `admin:create:local`, and `test:e2e`, which belong to A-03, A-06, and B.
+**Status (2026-09-22):** **merged to `main`** in PR #1 (merge commit `ad7a202`, commits `33c939e`, `246c6a3`, `9fa208a`); **not reviewed by B**. CI has never executed: GitHub Actions is blocked by an account billing lock, so the workflow is unproven on a runner. Verified on Node.js 24.19.0 / npm 11.17.0: clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (29 tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers. `npm audit` reports no vulnerabilities after the sharp 0.35.4 bump. Remaining: agree the placeholder `src/app/layout.tsx` and `page.tsx` with B so B-02 replaces them, and merge. Still missing by design: `scripts/seed.mjs` and `supabase/tests/` for `db:seed:local` and `test:db`, plus `db:types`, `admin:create:local`, and `test:e2e`, which belong to A-03, A-06, and B.
 
 ### A-03 — Local Supabase, configuration, and migrations
 
 **Dependencies:** A-02. **Files:** `supabase/config.toml`, migrations, environment validation, local scripts.
 
-- [ ] Verify the Docker engine is running; start the local Supabase stack and record API, Studio, database, and mail-capture locations.
-- [ ] Configure Auth site/redirect URLs and local email confirmation/recovery behavior.
-- [ ] Validate environment variables at startup with actionable missing/invalid configuration errors; never print secret values.
-- [ ] Separate normal publishable configuration from privileged runtime and migration credentials.
-- [ ] Implement a data-preserving migration command explicitly targeting local Supabase; keep reset commands restricted to disposable tests or explicit requests.
-- [ ] Establish one timestamped SQL migration history and generated TypeScript database types; document how types are regenerated.
-- [ ] Test both fresh setup and applying the next migration without losing existing fixture data.
-- [ ] Document schema changes versus project settings: buckets, redirect URLs, templates, and SMTP may need explicit reconciliation.
+- [x] Verify the Docker engine is running; start the local Supabase stack and record API, Studio, database, and mail-capture locations.
+- [x] Configure Auth site/redirect URLs and local email confirmation/recovery behavior.
+- [x] Validate environment variables at startup with actionable missing/invalid configuration errors; never print secret values.
+- [x] Separate normal publishable configuration from privileged runtime and migration credentials.
+- [x] Implement a data-preserving migration command explicitly targeting local Supabase; keep reset commands restricted to disposable tests or explicit requests.
+- [x] Establish one timestamped SQL migration history and generated TypeScript database types; document how types are regenerated.
+- [x] Test both fresh setup and applying the next migration without losing existing fixture data.
+- [x] Document schema changes versus project settings: buckets, redirect URLs, templates, and SMTP may need explicit reconciliation.
 
 **Done when:** both developers can reproduce the same local services/schema without touching hosted projects.
+
+**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-03-local-supabase-migrations` (commits `ddca74f`, `f2fbe6e`, `cb27a18`); **not reviewed, not merged**. Local ports are offset to 544xx (API 54421, database 54422, Studio 54423, mail capture 54424) because another local Supabase project occupies the defaults. Verified: fresh apply of the baseline migration, `anon`/`authenticated` hold no privileges on `app_private`, `set_updated_at` has a pinned search path and no browser execute grant, a later migration applied without losing existing rows, `npm run db:types` regenerates cleanly, and REST/Auth/Studio/mail all respond. No hosted project is linked and every script passes `--local`. Remaining: none inside A-03; database permission tests with real user credentials belong to A-05 and A-07.
 
 ### A-04 — Supabase clients and verified identity
 
