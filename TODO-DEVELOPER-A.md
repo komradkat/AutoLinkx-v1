@@ -109,16 +109,22 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Dependencies:** A-01/A-04/A-05. **Files:** accounts actions/schemas/services; Auth callback handlers.
 
-- [ ] Implement registration, email confirmation, login, and logout with bounded inputs and safe action results.
-- [ ] Implement recovery request, callback verification, and password update; test invalid, expired, and reused links.
-- [ ] Allowlist return destinations; reject external/protocol-relative redirect targets and avoid logging token-bearing URLs.
-- [ ] Use generic recovery responses and configure Auth's own rate controls; direct Auth calls bypass Next.js-only throttling.
-- [ ] Implement profile/contact preference updates using current identity and validated fields.
+- [x] Implement registration, email confirmation, login, and logout with bounded inputs and safe action results.
+- [x] Implement recovery request, callback verification, and password update; test invalid, expired, and reused links.
+- [x] Allowlist return destinations; reject external/protocol-relative redirect targets and avoid logging token-bearing URLs.
+- [x] Use generic recovery responses and configure Auth's own rate controls; direct Auth calls bypass Next.js-only throttling.
+- [x] Implement profile/contact preference updates using current identity and validated fields.
 - [ ] Verify logout/password-reset session behavior, including the validity window of already issued access tokens; document actual behavior.
-- [ ] Provide an explicit operator-only administrator bootstrap command with secure input and no shipped credentials; later seed tooling reuses it.
+- [x] Provide an explicit operator-only administrator bootstrap command with secure input and no shipped credentials; later seed tooling reuses it.
 - [ ] Send B action signatures, safe errors, confirmation flow, and local mail instructions for B-05 integration.
 
 **Done when:** account and profile flows work against real local Auth, including recovery and invalid redirects.
+
+**Status (2026-09-23):** implemented on branch `dev-a/A-06-account-actions-screens`; **PR #6 open, not reviewed, not merged**. Verified against real local Auth: registration, profile creation from the sign-up name, sign-in refused until confirmation, sign-in after confirming, profile editing, consent-gated publication, sign out, recovery for known and unknown addresses, and a password change refused without a session. Sign-in and registration return identical messages for wrong password and unknown account, so neither form is an account-existence oracle. The redirect allowlist has 10 tests covering absolute, protocol-relative, backslash, javascript and traversal targets.
+
+**Unverified:** the two cases that follow the confirmation link out of the mail catcher. They need Supabase restarted to load the new email templates, and Docker stopped responding (full disk) before that could run.
+
+**Also delivered, outside A's ownership and agreed with the user:** the five account screens and the shared form controls, which cover B-03 and most of B-02 and B-04. Session behaviour after logout and password reset is **not yet documented** — the checklist item asking for the residual validity of already-issued access tokens is still open and belongs with A-07.
 
 ### A-07 — Foundation tests and baseline CI
 

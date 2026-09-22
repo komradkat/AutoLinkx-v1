@@ -62,22 +62,31 @@ Changes to a published contract need a small joint review and updates to fixture
 
 - [x] **A-02:** Verify preliminary scaffold; pin compatible dependencies/runtime; provide working dev, typecheck, test, and build scripts. *(Merged to `main` in PR #1, merge commit `ad7a202`. CI exists but has never run: GitHub Actions is blocked by an account billing lock.)*
 - [ ] **A-03:** Configure local Supabase and data-preserving migrations; provide `.env.example` and reproducible startup steps. *(Done and locally verified on `dev-a/A-03-local-supabase-migrations`; awaiting review and merge.)*
-- [ ] **A-04:** Implement request-scoped Supabase clients, SSR token refresh, verified identity, and isolated privileged clients. *(Done and locally verified on `dev-a/A-04-supabase-clients-identity`; awaiting review and merge.)*
-- [ ] **A-05:** Add profiles/private contacts/administrator membership, initialization, RLS, grants, and safe projections.
-- [ ] **A-06:** Implement register/confirm/login/logout/recovery/profile actions, safe redirects, and operator-only administrator bootstrap.
-- [ ] **A-07:** Test account permissions, profile isolation, role escalation denial, and recovery behavior; add baseline CI.
+- [ ] **A-04:** Implement request-scoped Supabase clients, SSR token refresh, verified identity, and isolated privileged clients. *(Done and locally verified; **PR #4** open. Administrator membership failed closed here until A-05 landed the table.)*
+- [ ] **A-05:** Add profiles/private contacts/administrator membership, initialization, RLS, grants, and safe projections. *(Done and locally verified; **PR #5** open, stacked on #4. 16 permission tests run as ordinary users and anonymous callers through the Data API.)*
+- [ ] **A-06:** Implement register/confirm/login/logout/recovery/profile actions, safe redirects, and operator-only administrator bootstrap. *(Done; **PR #6** open, stacked on #5. **Two confirmation-link cases are unverified** — Docker was unresponsive when they were due to run. Email templates now link to the app's own routes with a token hash, because the Supabase default only works in the browser that requested it.)*
+- [ ] **A-07:** Test account permissions, profile isolation, role escalation denial, and recovery behavior; add baseline CI. *(Next task for A. Note: CI exists but **has never executed** — GitHub Actions is blocked by an account billing lock.)*
 
 ### B — Other developer's TODOs
 
-- [ ] **B-02:** Build design tokens, typography, responsive header/footer, buttons, inputs, status badges, and listing-card component. *(**Partly delivered by A** on `dev-a/A-04-supabase-clients-identity`, with the user's agreement: design tokens, typography, responsive header and footer, and button and status-badge styles now exist in `src/app/globals.css` and `src/components/`, taken from `Ui design/`. **Still B's:** form inputs, the listing-card component, and any rework of the token set. Replace freely; keep identity as a server-passed prop.)*
-- [ ] **B-03:** Build registration/login/confirmation/recovery/profile screens against A-01 contracts.
-- [ ] **B-04:** Add app loading/error/not-found states, pending forms, inline errors, and keyboard focus behavior. *(**Partly delivered by A:** `src/app/not-found.tsx` plus the skip link and the visible focus ring in `globals.css`. **Still B's:** `loading.tsx` and `error.tsx` boundaries, pending-form feedback, and inline error presentation.)*
-- [ ] **B-05:** Connect account screens to A-06; test confirmation, recovery, logout, and private contact preferences in a browser.
+- [ ] **B-02:** Build design tokens, typography, responsive header/footer, buttons, inputs, status badges, and listing-card component. *(**Mostly delivered by A** (PRs #4 and #6), with the user's agreement. Done: design tokens and typography in `src/app/globals.css`, responsive header and footer in `src/components/`, buttons, status badges, and form inputs in `src/components/form-controls.tsx`. **Still B's:** the listing-card component, which needs A-08's listing data, and any rework of the token set or the wordmark — the brand currently renders as text, not the supplied logo.)*
+- [ ] **B-03:** Build registration/login/confirmation/recovery/profile screens against A-01 contracts. *(**Delivered by A** in PR #6: `/register`, `/login`, `/forgot-password`, `/reset-password` and `/profile` exist and call the real A-06 actions — no fixtures. **Still B's:** visual review against `Ui design/`, and the accessibility and responsive inspection in B-20.)*
+- [ ] **B-04:** Add app loading/error/not-found states, pending forms, inline errors, and keyboard focus behavior. *(**Mostly delivered by A:** `src/app/not-found.tsx`, the skip link and focus ring in `globals.css`, pending submit labels, inline field errors wired with `aria-describedby`, and an error summary that links to each field. **Still B's:** `loading.tsx` and `error.tsx` boundaries.)*
+- [ ] **B-05:** Connect account screens to A-06; test confirmation, recovery, logout, and private contact preferences in a browser. *(**Connection done by A** in PR #6; the screens call the live actions. **Still B's: the browser testing**, which is the point of this task and has not happened. Note for whoever runs it: form-filling browser extensions inject attributes that break React hydration and leave forms silently unresponsive — use a private window. See [docs/running-locally.md](docs/running-locally.md).)*
 
-**Can run in parallel:** B-01 through B-04 can use fixtures while A prepares Supabase.
+**Can run in parallel:** B-01 through B-04 can use fixtures while A prepares Supabase. In practice they did not need to: A built the shell and the account screens against live services, so B inherits working screens rather than fixture ones.
 
-**Shell already built (A, 2026-09-22).** The app has a working header, footer, homepage shell and not-found screen from the design references, and the header renders the real verified viewer. It replaced A's earlier scaffold placeholder. B owns all of it from B-02 onward; the deliberate omissions are the search form, the listing count and the Latest cars grid, which need listing tables (A-08, A-12). No screen anywhere shows invented data.  
-**Gate G1:** both developers can start the app from a clean checkout; account flows work against local Supabase; private contacts and administrator membership are protected. Merge the foundation before feature branches build on it.
+**Ownership overlap, agreed with the user (2026-09-22/23).** Developer A built
+part of B's area rather than leaving screens unbuilt while the backend ran
+ahead. What exists: the app shell (header, footer, homepage, not-found), the
+design tokens, the shared form controls, and the five account screens, all
+against live services with no invented data. B owns every one of these files
+and may replace them freely; the only constraint is that identity stays a
+server-passed prop and fixtures never become a data fallback.
+
+Still untouched on B's side: listing cards, discovery screens, the seller
+dashboard and editor, the interaction screens, the administrator queues, the
+browser journeys, and the accessibility and responsive inspection.
 
 ## Stage 2 — Seller workflow
 
