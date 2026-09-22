@@ -14,10 +14,10 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 ### Start here
 
-- [ ] Review current git status, existing scaffold, and any `AGENTS.md`; preserve unrelated changes.
-- [ ] Claim A-01/A-02 and create a task branch from the agreed integration branch.
+- [x] Review current git status, existing scaffold, and any `AGENTS.md`; preserve unrelated changes.
+- [x] Claim A-01/A-02 and create a task branch from the agreed integration branch.
 - [ ] Publish initial contracts so B can build against stable shapes.
-- [ ] Verify the toolchain and share a clean-checkout startup command.
+- [x] Verify the toolchain and share a clean-checkout startup command.
 - [ ] Start local Supabase and establish the first migration/test cycle.
 - [ ] Complete accounts and profile isolation before implementing listing mutations.
 
@@ -27,31 +27,35 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Dependencies:** existing MVP and shared TODO. **Files:** `docs/contracts.md`, `src/contracts/**`.
 
-- [ ] Define safe `Viewer`, `PublicListing`, `OwnerListing`, photo, profile, inquiry, and report DTOs. Keep database rows and public DTOs distinct.
-- [ ] Define listing-status and command unions using the agreed six statuses and transition table.
-- [ ] Define a serializable action result: success data or safe error code/message, field errors, and optional retry guidance. Distinguish forbidden, unauthenticated, invalid, conflict, unavailable, and rate-limited.
-- [ ] Specify ID types, integer price units, currency source, kilometers, timestamp serialization, nullable fields, and expected-version handling.
+- [x] Define safe `Viewer`, `PublicListing`, `OwnerListing`, photo, profile, inquiry, and report DTOs. Keep database rows and public DTOs distinct.
+- [x] Define listing-status and command unions using the agreed six statuses and transition table.
+- [x] Define a serializable action result: success data or safe error code/message, field errors, and optional retry guidance. Distinguish forbidden, unauthenticated, invalid, conflict, unavailable, and rate-limited.
+- [x] Specify ID types, integer price units, currency source, kilometers, timestamp serialization, nullable fields, and expected-version handling.
 - [ ] Specify action/query names and inputs; derive seller, buyer, and administrator identity on the server rather than accepting actor IDs.
-- [ ] Specify URL search parameters, sort values, page size 12, count semantics, invalid-range behavior, and stable ordering.
-- [ ] Specify upload request/response, staged-photo references, attachment, cover/reorder inputs, and media delivery route.
-- [ ] Specify confirmation/reset routes, post-auth destinations, and expired-link responses.
+- [x] Specify URL search parameters, sort values, page size 12, count semantics, invalid-range behavior, and stable ordering.
+- [x] Specify upload request/response, staged-photo references, attachment, cover/reorder inputs, and media delivery route.
+- [x] Specify confirmation/reset routes, post-auth destinations, and expired-link responses.
 - [ ] Ask B to review contracts against their screens; resolve missing fields and document the agreed version.
 
 **Done when:** B can create typed fixtures and forms without guessing fields or receiving private data. Contract modules contain no server clients or secret configuration.
+
+**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-01-A-02-contracts-and-scaffold` (commit `9bc970e`); **not reviewed, not merged**. `src/contracts/**` and `docs/contracts.md` exist and are covered by 29 passing tests, including a check that the transition table still matches MVP.md section 6. Proposed interfaces only: no table, RPC, service, or handler implements them. Remaining: B's B-01 review of the five open questions at the end of `docs/contracts.md`, and a canonical list of action/query function names, which lands with A-06 and A-09.
 
 ### A-02 — Verify the scaffold and development toolchain
 
 **Dependencies:** none; run alongside A-01. **Files:** package/lockfile, runtime/TypeScript/Next.js config, test configuration.
 
-- [ ] Inspect existing versions and scripts; verify published versions and actual compatibility before installing or changing them.
-- [ ] Pin the runtime and commit a reproducible lockfile. Confirm a clean `npm ci` works.
-- [ ] Verify TypeScript strict mode, import aliases, and server/client module boundaries.
-- [ ] Establish working dev, build, typecheck, lint, and meaningful test commands; do not report an empty test suite as verification.
+- [x] Inspect existing versions and scripts; verify published versions and actual compatibility before installing or changing them.
+- [x] Pin the runtime and commit a reproducible lockfile. Confirm a clean `npm ci` works.
+- [x] Verify TypeScript strict mode, import aliases, and server/client module boundaries.
+- [x] Establish working dev, build, typecheck, lint, and meaningful test commands; do not report an empty test suite as verification.
 - [ ] Coordinate the minimal app shell with B so the project builds without competing edits to root layout/styles.
-- [ ] Check `.gitignore` excludes credentials, local service state, generated output, and dependencies while preserving `.env.example`.
-- [ ] Record exact runtime requirements and commands; identify scripts pointing to files that do not yet exist.
+- [x] Check `.gitignore` excludes credentials, local service state, generated output, and dependencies while preserving `.env.example`.
+- [x] Record exact runtime requirements and commands; identify scripts pointing to files that do not yet exist.
 
 **Done when:** the agreed shell starts and builds from a clean install, and B can reproduce the setup.
+
+**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-01-A-02-contracts-and-scaffold` (commits `33c939e`, `246c6a3`, `9fa208a`); **not reviewed, not merged**. Verified on Node.js 24.19.0 / npm 11.17.0: clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (29 tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers. `npm audit` reports no vulnerabilities after the sharp 0.35.4 bump. Remaining: agree the placeholder `src/app/layout.tsx` and `page.tsx` with B so B-02 replaces them, and merge. Still missing by design: `scripts/seed.mjs` and `supabase/tests/` for `db:seed:local` and `test:db`, plus `db:types`, `admin:create:local`, and `test:e2e`, which belong to A-03, A-06, and B.
 
 ### A-03 — Local Supabase, configuration, and migrations
 

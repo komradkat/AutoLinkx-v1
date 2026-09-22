@@ -37,7 +37,7 @@ Client Components may import plain contracts and supported Server Actions, but m
 
 ## Agree these interfaces first
 
-- [ ] **A-01:** Publish `docs/contracts.md` and `src/contracts/` with B's review before connecting pages to live data.
+- [ ] **A-01:** Publish `docs/contracts.md` and `src/contracts/` with B's review before connecting pages to live data. *(Written and locally verified on `dev-a/A-01-A-02-contracts-and-scaffold`; awaiting B's review and merge.)*
 - [ ] **B-01:** Review the contract against every required screen and create test-only fixtures with the same shapes.
 
 The contract must define:
@@ -60,7 +60,7 @@ Changes to a published contract need a small joint review and updates to fixture
 
 ### A — Your TODOs
 
-- [ ] **A-02:** Verify preliminary scaffold; pin compatible dependencies/runtime; provide working dev, typecheck, test, and build scripts.
+- [ ] **A-02:** Verify preliminary scaffold; pin compatible dependencies/runtime; provide working dev, typecheck, test, and build scripts. *(Done and locally verified on `dev-a/A-01-A-02-contracts-and-scaffold`; awaiting review and merge.)*
 - [ ] **A-03:** Configure local Supabase and data-preserving migrations; provide `.env.example` and reproducible startup steps.
 - [ ] **A-04:** Implement request-scoped Supabase clients, SSR token refresh, verified identity, and isolated privileged clients.
 - [ ] **A-05:** Add profiles/private contacts/administrator membership, initialization, RLS, grants, and safe projections.
