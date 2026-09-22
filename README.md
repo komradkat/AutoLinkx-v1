@@ -26,6 +26,7 @@ This replaces the earlier Better Auth, ORM, and dual-database proposal. **Use lo
 - **A-02:** verified toolchain — committed lockfile, pinned Node.js 24, ESLint flat config, working `dev`/`lint`/`typecheck`/`test`/`build`, and a GitHub Actions workflow running those four checks.
 - **A-03:** local Supabase on offset ports, a baseline migration establishing the private schema and grant hygiene, startup configuration validation, and generated database types. No application tables yet.
 - **A-04:** request-scoped Supabase clients, session refresh in `src/proxy.ts`, verified-identity helpers returning the shared `Viewer` DTO, and an isolated privileged client. Administrator membership fails closed until A-05.
+- **Shell (part of B-02/B-04, built by A):** design tokens, responsive header and footer, homepage shell and not-found screen from `Ui design/`. The header shows the real verified viewer. Search, listing counts and car cards are deliberately absent until listings exist.
 
 ### Planned first release
 
