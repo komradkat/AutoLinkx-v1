@@ -12,7 +12,7 @@ Coding assistants should read [AGENTS.md](AGENTS.md) for repository-wide archite
 
 ## Current status
 
-**MVP documentation; application not implemented.** The initial inspection found no existing Django application or `AGENTS.md`. Preliminary package, Next.js, TypeScript, environment, and Supabase configuration files were created before the task was clarified as documentation. They are unverified scaffolding, not a runnable MVP; there are no implemented pages, migrations, or tests. No application tests or deployments have been performed.
+**Toolchain and shared contracts only; no marketplace feature is implemented.** Tasks A-01 and A-02 verified the preliminary scaffold and published the frontend/backend contract. The toolchain now installs, lints, type-checks, tests, builds, and serves a placeholder page from a clean checkout. There are still no migrations, no server services, no account flows, and no product pages; the only test suite covers the contract modules themselves. Nothing has been deployed.
 
 The agreed stack is **Next.js + Supabase**. Next.js provides the website and business workflows; Supabase provides Auth, PostgreSQL, and Storage. We will build a custom moderation dashboard.
 
@@ -22,6 +22,8 @@ This replaces the earlier Better Auth, ORM, and dual-database proposal. **Use lo
 
 - Repository initialized.
 - Product, architecture, infrastructure, and implementation plan documented.
+- **A-01:** shared frontend/backend contract in `src/contracts/` and [docs/contracts.md](docs/contracts.md), with tests tying the listing lifecycle to MVP.md. Proposed interfaces only; no service implements them.
+- **A-02:** verified toolchain — committed lockfile, pinned Node.js 24, ESLint flat config, working `dev`/`lint`/`typecheck`/`test`/`build`, and a GitHub Actions workflow running those four checks.
 
 ### Planned first release
 
@@ -304,11 +306,24 @@ Use unit tests for validation, database tests for transactions/constraints/RLS/g
 
 Cover ownership, all transitions, moderation, visibility, private contacts, duplicate favorites, inquiry availability/concurrency, report limits, search/filter/pagination, upload validation, recovery redirects, and sessions.
 
-Planned scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:db`, `npm run test:e2e`, and `npm run build`. CI recreates only disposable local databases, checks generated types, and tests upgrade migrations.
+Working scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run dev`. Not implemented yet: `npm run test:db` (no `supabase/tests/`), `npm run db:seed:local` (no `scripts/seed.mjs`), `npm run test:e2e`, `npm run db:types`, and `npm run admin:create:local`. CI recreates only disposable local databases, checks generated types, and tests upgrade migrations.
 
-**Checks performed:** documentation/repository inspection only. Application scripts, migrations, builds, and browser checks are not available yet.
+**Checks performed (A-01/A-02):** clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (29 contract tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers — all passing on Node.js 24.19.0 / npm 11.17.0 on Windows. Not yet exercised: migrations, database/RLS tests, browser tests, container builds, and every hosted check.
 
-## Local setup plan (not executable yet)
+## Local setup
+
+Working today, from a clean checkout (Node.js 24 — see `.nvmrc`):
+
+```sh
+npm ci
+npm run lint && npm run typecheck && npm test && npm run build
+npm run dev   # http://localhost:3000 — scaffold placeholder page
+```
+
+No environment file is needed yet: nothing reads Supabase configuration so far.
+The remaining steps below stay planned until A-03 adds migrations and clients.
+
+### Planned full setup (not executable yet)
 
 Prerequisites: pinned supported Node.js, npm, Git, and a Docker-compatible runtime. The foundation stage adds project-local Supabase CLI/configuration. Local Supabase supplies PostgreSQL, Auth, and Storage; see [local development documentation](https://supabase.com/docs/guides/local-development).
 
