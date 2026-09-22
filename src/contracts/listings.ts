@@ -154,8 +154,10 @@ export function allowedActionsFor(
 }
 
 export const TRANSMISSIONS = ['manual', 'automatic'] as const;
-export const FUEL_TYPES = ['petrol', 'diesel', 'hybrid', 'electric', 'lpg'] as const;
-export const VEHICLE_CONDITIONS = ['new', 'used'] as const;
+
+/** Values taken from the supplied design references, not invented here. */
+export const FUEL_TYPES = ['gasoline', 'diesel', 'hybrid', 'electric'] as const;
+export const VEHICLE_CONDITIONS = ['excellent', 'good', 'fair', 'needs_work'] as const;
 
 export type Transmission = (typeof TRANSMISSIONS)[number];
 export type FuelType = (typeof FUEL_TYPES)[number];

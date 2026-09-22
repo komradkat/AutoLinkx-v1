@@ -303,9 +303,11 @@ matching `supabase/config.toml`.
 
 ## 12. Open questions for B's review (B-01)
 
-1. **Enum values.** `TRANSMISSIONS`, `FUEL_TYPES` (petrol, diesel, hybrid,
-   electric, lpg), `VEHICLE_CONDITIONS` (new, used), and `REPORT_CATEGORIES`
-   are proposals. They become database check constraints in A-08, so changes
+1. **Enum values — mostly settled by the design references.** `FUEL_TYPES` is
+   now gasoline, diesel, hybrid, electric (no LPG) and `VEHICLE_CONDITIONS` is
+   excellent, good, fair, needs_work, both taken from the filter panel in
+   `Ui design/web/02-Search-results.png`. `REPORT_CATEGORIES` is still a
+   proposal. All of them become database check constraints in A-08, so changes
    are cheap now and cost a migration later.
 2. **Currency.** Undecided in MVP section 13; the contract only assumes one.
 3. **Listing title.** There is none — cards compose make/model/year. Say so if
