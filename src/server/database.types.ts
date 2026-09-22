@@ -34,13 +34,67 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          location: string | null
+          published_email: string | null
+          published_phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          location?: string | null
+          published_email?: string | null
+          published_phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          location?: string | null
+          published_email?: string | null
+          published_phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_my_contacts: {
+        Args: never
+        Returns: {
+          contact_email: string
+          contact_phone: string
+          publish_email: boolean
+          publish_phone: boolean
+        }[]
+      }
+      grant_administrator: {
+        Args: { p_granted_by?: string; p_user_id: string }
+        Returns: undefined
+      }
+      is_current_user_administrator: { Args: never; Returns: boolean }
+      revoke_administrator: { Args: { p_user_id: string }; Returns: undefined }
+      update_profile: {
+        Args: {
+          p_contact_email: string
+          p_contact_phone: string
+          p_display_name: string
+          p_location: string
+          p_publish_email: boolean
+          p_publish_phone: boolean
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
