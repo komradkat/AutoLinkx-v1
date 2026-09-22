@@ -78,16 +78,18 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Dependencies:** A-03. **Files:** `src/server/supabase/**`, `src/server/auth/**`, `src/proxy.ts`.
 
-- [ ] Implement a request-scoped server client using the supported SSR cookie adapter.
-- [ ] Implement token refresh with the pinned Next.js/Supabase integration and propagate refreshed cookies correctly.
-- [ ] Provide verified identity helpers; never authorize from unverified session data or client-submitted identity.
-- [ ] Return safe viewer DTOs and distinguish anonymous, confirmed, and administrator capabilities.
-- [ ] Isolate the secret/service-role client behind `server-only`; prohibit imports from UI/contract modules.
-- [ ] Ensure normal user queries/RPCs retain the caller's identity rather than bypassing RLS with privileged credentials.
-- [ ] Map auth failures to controlled responses; ensure personalized/cookie responses cannot enter shared caches.
-- [ ] Test expired/malformed sessions and cross-request isolation; avoid module-level clients holding user session state.
+- [x] Implement a request-scoped server client using the supported SSR cookie adapter.
+- [x] Implement token refresh with the pinned Next.js/Supabase integration and propagate refreshed cookies correctly.
+- [x] Provide verified identity helpers; never authorize from unverified session data or client-submitted identity.
+- [x] Return safe viewer DTOs and distinguish anonymous, confirmed, and administrator capabilities.
+- [x] Isolate the secret/service-role client behind `server-only`; prohibit imports from UI/contract modules.
+- [x] Ensure normal user queries/RPCs retain the caller's identity rather than bypassing RLS with privileged credentials.
+- [x] Map auth failures to controlled responses; ensure personalized/cookie responses cannot enter shared caches.
+- [x] Test expired/malformed sessions and cross-request isolation; avoid module-level clients holding user session state.
 
 **Done when:** actions and handlers can independently verify users without exposing tokens or granting service-role access.
+
+**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-04-supabase-clients-identity` (commits `e434327`, `1d9b0dd`); **not reviewed, not merged**. Verified against the running local Auth server: sign-in lands in cookies, a client rebuilt from those cookies sees the same user, tampered and malformed cookies degrade to anonymous, two sessions stay isolated, auth cookie writes carry `Cache-Control: no-store`, and a planted `is_admin` value in user metadata is ignored. 92 unit tests pass, plus 8 integration tests that skip when the stack is down. **Administrator membership fails closed** — `isAdministrator()` returns false until A-05 adds the table, so no moderation path can succeed early. Remaining: proxy-level refresh of a genuinely expiring session is only verified indirectly; A-06 and A-07 exercise it with real sign-in flows.
 
 ### A-05 — Profiles, privacy, and administrator membership
 
