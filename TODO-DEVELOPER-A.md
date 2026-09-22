@@ -16,7 +16,7 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 - [x] Review current git status, existing scaffold, and any `AGENTS.md`; preserve unrelated changes.
 - [x] Claim A-01/A-02 and create a task branch from the agreed integration branch.
-- [ ] Publish initial contracts so B can build against stable shapes.
+- [x] Publish initial contracts so B can build against stable shapes.
 - [x] Verify the toolchain and share a clean-checkout startup command.
 - [x] Start local Supabase and establish the first migration/test cycle.
 - [ ] Complete accounts and profile isolation before implementing listing mutations.
@@ -39,7 +39,7 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Done when:** B can create typed fixtures and forms without guessing fields or receiving private data. Contract modules contain no server clients or secret configuration.
 
-**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-01-A-02-contracts-and-scaffold` (commit `9bc970e`); **not reviewed, not merged**. `src/contracts/**` and `docs/contracts.md` exist and are covered by 29 passing tests, including a check that the transition table still matches MVP.md section 6. Proposed interfaces only: no table, RPC, service, or handler implements them. Remaining: B's B-01 review of the five open questions at the end of `docs/contracts.md`, and a canonical list of action/query function names, which lands with A-06 and A-09.
+**Status (2026-09-22):** **merged to `main`** in PR #1 (merge commit `ad7a202`, contract commit `9bc970e`); **B's review still outstanding**. `src/contracts/**` and `docs/contracts.md` exist and are covered by 29 passing tests, including a check that the transition table still matches MVP.md section 6. Proposed interfaces only: no table, RPC, service, or handler implements them. Remaining: B's B-01 review of the five open questions at the end of `docs/contracts.md`, and a canonical list of action/query function names, which lands with A-06 and A-09.
 
 ### A-02 — Verify the scaffold and development toolchain
 
@@ -55,7 +55,7 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Done when:** the agreed shell starts and builds from a clean install, and B can reproduce the setup.
 
-**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-01-A-02-contracts-and-scaffold` (commits `33c939e`, `246c6a3`, `9fa208a`); **not reviewed, not merged**. Verified on Node.js 24.19.0 / npm 11.17.0: clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (29 tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers. `npm audit` reports no vulnerabilities after the sharp 0.35.4 bump. Remaining: agree the placeholder `src/app/layout.tsx` and `page.tsx` with B so B-02 replaces them, and merge. Still missing by design: `scripts/seed.mjs` and `supabase/tests/` for `db:seed:local` and `test:db`, plus `db:types`, `admin:create:local`, and `test:e2e`, which belong to A-03, A-06, and B.
+**Status (2026-09-22):** **merged to `main`** in PR #1 (merge commit `ad7a202`, commits `33c939e`, `246c6a3`, `9fa208a`); **not reviewed by B**. CI has never executed: GitHub Actions is blocked by an account billing lock, so the workflow is unproven on a runner. Verified on Node.js 24.19.0 / npm 11.17.0: clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (29 tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers. `npm audit` reports no vulnerabilities after the sharp 0.35.4 bump. Remaining: agree the placeholder `src/app/layout.tsx` and `page.tsx` with B so B-02 replaces them, and merge. Still missing by design: `scripts/seed.mjs` and `supabase/tests/` for `db:seed:local` and `test:db`, plus `db:types`, `admin:create:local`, and `test:e2e`, which belong to A-03, A-06, and B.
 
 ### A-03 — Local Supabase, configuration, and migrations
 
