@@ -41,7 +41,7 @@ const publicSchema = z.object({
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1, 'must not be empty'),
   MARKETPLACE_CURRENCY: z
     .string()
-    .regex(/^[A-Z]{3}$/, 'must be a three-letter uppercase ISO-4217 code, e.g. EUR'),
+    .regex(/^[A-Z]{3}$/, 'must be a three-letter uppercase ISO-4217 code, e.g. PHP'),
   LISTING_PHOTOS_BUCKET: z.string().min(1, 'must not be empty'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 });

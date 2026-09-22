@@ -70,9 +70,9 @@ export interface Paginated<TItem> extends PageMeta {
 
 /** Server-supplied marketplace configuration; one currency per deployment. */
 export interface MarketplaceConfig {
-  /** ISO-4217, e.g. `EUR`. Source: server configuration, not user input. */
+  /** ISO-4217, e.g. `PHP`. Source: server configuration, not user input. */
   currency: string;
-  /** Minor units per major unit as a power of ten: 2 for EUR/USD, 0 for JPY. */
+  /** Minor units per major unit as a power of ten: 2 for PHP/USD, 0 for JPY. */
   currencyMinorUnitExponent: number;
   pageSize: number;
 }
