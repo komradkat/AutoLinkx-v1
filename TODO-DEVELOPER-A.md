@@ -18,7 +18,7 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 - [x] Claim A-01/A-02 and create a task branch from the agreed integration branch.
 - [ ] Publish initial contracts so B can build against stable shapes.
 - [x] Verify the toolchain and share a clean-checkout startup command.
-- [ ] Start local Supabase and establish the first migration/test cycle.
+- [x] Start local Supabase and establish the first migration/test cycle.
 - [ ] Complete accounts and profile isolation before implementing listing mutations.
 
 ## Stage 1 — Foundation and accounts
@@ -61,16 +61,18 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Dependencies:** A-02. **Files:** `supabase/config.toml`, migrations, environment validation, local scripts.
 
-- [ ] Verify the Docker engine is running; start the local Supabase stack and record API, Studio, database, and mail-capture locations.
-- [ ] Configure Auth site/redirect URLs and local email confirmation/recovery behavior.
-- [ ] Validate environment variables at startup with actionable missing/invalid configuration errors; never print secret values.
-- [ ] Separate normal publishable configuration from privileged runtime and migration credentials.
-- [ ] Implement a data-preserving migration command explicitly targeting local Supabase; keep reset commands restricted to disposable tests or explicit requests.
-- [ ] Establish one timestamped SQL migration history and generated TypeScript database types; document how types are regenerated.
-- [ ] Test both fresh setup and applying the next migration without losing existing fixture data.
-- [ ] Document schema changes versus project settings: buckets, redirect URLs, templates, and SMTP may need explicit reconciliation.
+- [x] Verify the Docker engine is running; start the local Supabase stack and record API, Studio, database, and mail-capture locations.
+- [x] Configure Auth site/redirect URLs and local email confirmation/recovery behavior.
+- [x] Validate environment variables at startup with actionable missing/invalid configuration errors; never print secret values.
+- [x] Separate normal publishable configuration from privileged runtime and migration credentials.
+- [x] Implement a data-preserving migration command explicitly targeting local Supabase; keep reset commands restricted to disposable tests or explicit requests.
+- [x] Establish one timestamped SQL migration history and generated TypeScript database types; document how types are regenerated.
+- [x] Test both fresh setup and applying the next migration without losing existing fixture data.
+- [x] Document schema changes versus project settings: buckets, redirect URLs, templates, and SMTP may need explicit reconciliation.
 
 **Done when:** both developers can reproduce the same local services/schema without touching hosted projects.
+
+**Status (2026-09-22):** implemented and locally verified on branch `dev-a/A-03-local-supabase-migrations` (commits `ddca74f`, `f2fbe6e`, `cb27a18`); **not reviewed, not merged**. Local ports are offset to 544xx (API 54421, database 54422, Studio 54423, mail capture 54424) because another local Supabase project occupies the defaults. Verified: fresh apply of the baseline migration, `anon`/`authenticated` hold no privileges on `app_private`, `set_updated_at` has a pinned search path and no browser execute grant, a later migration applied without losing existing rows, `npm run db:types` regenerates cleanly, and REST/Auth/Studio/mail all respond. No hosted project is linked and every script passes `--local`. Remaining: none inside A-03; database permission tests with real user credentials belong to A-05 and A-07.
 
 ### A-04 — Supabase clients and verified identity
 

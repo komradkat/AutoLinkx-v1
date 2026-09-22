@@ -61,7 +61,7 @@ Changes to a published contract need a small joint review and updates to fixture
 ### A — Your TODOs
 
 - [ ] **A-02:** Verify preliminary scaffold; pin compatible dependencies/runtime; provide working dev, typecheck, test, and build scripts. *(Done and locally verified on `dev-a/A-01-A-02-contracts-and-scaffold`; awaiting review and merge.)*
-- [ ] **A-03:** Configure local Supabase and data-preserving migrations; provide `.env.example` and reproducible startup steps.
+- [ ] **A-03:** Configure local Supabase and data-preserving migrations; provide `.env.example` and reproducible startup steps. *(Done and locally verified on `dev-a/A-03-local-supabase-migrations`; awaiting review and merge.)*
 - [ ] **A-04:** Implement request-scoped Supabase clients, SSR token refresh, verified identity, and isolated privileged clients.
 - [ ] **A-05:** Add profiles/private contacts/administrator membership, initialization, RLS, grants, and safe projections.
 - [ ] **A-06:** Implement register/confirm/login/logout/recovery/profile actions, safe redirects, and operator-only administrator bootstrap.
