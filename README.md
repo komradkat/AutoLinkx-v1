@@ -12,7 +12,7 @@ Coding assistants should read [AGENTS.md](AGENTS.md) for repository-wide archite
 
 ## Current status
 
-**Toolchain and shared contracts only; no marketplace feature is implemented.** Tasks A-01 and A-02 verified the preliminary scaffold and published the frontend/backend contract. The toolchain now installs, lints, type-checks, tests, builds, and serves a placeholder page from a clean checkout. There are still no migrations, no server services, no account flows, and no product pages; the only test suite covers the contract modules themselves. Nothing has been deployed.
+**Toolchain, contracts, and local database only; no marketplace feature is implemented.** Tasks A-01 to A-03 verified the scaffold, published the frontend/backend contract, and brought up local Supabase with a baseline migration. The toolchain installs, lints, type-checks, tests, builds, and serves a placeholder page from a clean checkout. There are still no application tables, no Supabase clients, no account flows, and no product pages; the tests cover the contract modules and configuration validation, nothing else. Nothing has been deployed.
 
 The agreed stack is **Next.js + Supabase**. Next.js provides the website and business workflows; Supabase provides Auth, PostgreSQL, and Storage. We will build a custom moderation dashboard.
 
@@ -24,6 +24,7 @@ This replaces the earlier Better Auth, ORM, and dual-database proposal. **Use lo
 - Product, architecture, infrastructure, and implementation plan documented.
 - **A-01:** shared frontend/backend contract in `src/contracts/` and [docs/contracts.md](docs/contracts.md), with tests tying the listing lifecycle to MVP.md. Proposed interfaces only; no service implements them.
 - **A-02:** verified toolchain — committed lockfile, pinned Node.js 24, ESLint flat config, working `dev`/`lint`/`typecheck`/`test`/`build`, and a GitHub Actions workflow running those four checks.
+- **A-03:** local Supabase on offset ports, a baseline migration establishing the private schema and grant hygiene, startup configuration validation, and generated database types. No application tables yet.
 
 ### Planned first release
 
@@ -308,7 +309,9 @@ Cover ownership, all transitions, moderation, visibility, private contacts, dupl
 
 Working scripts: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run dev`. Not implemented yet: `npm run test:db` (no `supabase/tests/`), `npm run db:seed:local` (no `scripts/seed.mjs`), `npm run test:e2e`, `npm run db:types`, and `npm run admin:create:local`. CI recreates only disposable local databases, checks generated types, and tests upgrade migrations.
 
-**Checks performed (A-01/A-02):** clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (29 contract tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers — all passing on Node.js 24.19.0 / npm 11.17.0 on Windows. Not yet exercised: migrations, database/RLS tests, browser tests, container builds, and every hosted check.
+**Checks performed (A-01 to A-03):** clean `npm ci`, `npm run lint`, `npm run typecheck`, `npm test` (41 unit tests), `npm run build`, and `npm run dev` serving the placeholder page with the configured security headers — all passing on Node.js 24.19.0 / npm 11.17.0 on Windows. Locally against Supabase CLI 2.117.0: the stack starts, the baseline migration applies to a fresh database, `anon` and `authenticated` hold no privileges on `app_private`, a later migration applied without losing existing rows, and `npm run db:types` regenerates cleanly. Not yet exercised: database/RLS permission tests with real user credentials, browser tests, container builds, and every hosted check.
+
+If `npm run typecheck` reports errors inside `.next/`, delete that directory: `next dev` and `next build` write different route-type artifacts, and the stale set is type-checked too.
 
 ## Local setup
 
@@ -320,8 +323,44 @@ npm run lint && npm run typecheck && npm test && npm run build
 npm run dev   # http://localhost:3000 — scaffold placeholder page
 ```
 
-No environment file is needed yet: nothing reads Supabase configuration so far.
-The remaining steps below stay planned until A-03 adds migrations and clients.
+Local Supabase (Docker must be running):
+
+```sh
+npm run db:start          # first run pulls several images
+npm run db:migrate:local  # apply pending migrations, preserving data
+npm run db:types          # regenerate src/server/database.types.ts
+npx supabase stop         # containers down; volumes and data are kept
+```
+
+### Local service locations
+
+Ports are offset from the Supabase defaults so this stack can run beside
+another local Supabase project. They come from `supabase/config.toml`.
+
+| Service | Location |
+| --- | --- |
+| API gateway | `http://127.0.0.1:54421` |
+| PostgreSQL | `postgresql://postgres:postgres@127.0.0.1:54422/postgres` |
+| Studio | `http://127.0.0.1:54423` |
+| Mail capture | `http://127.0.0.1:54424` — every confirmation and recovery mail lands here, none leaves the machine |
+
+`npx supabase status` prints the local keys for `.env.local`. Treat that output
+as a credential: do not paste it into issues, logs, or screenshots.
+
+### Migrations and generated types
+
+- Add one with `npx supabase migration new <name>`; it is timestamped SQL under `supabase/migrations/`.
+- Apply with `npm run db:migrate:local`. It applies only pending files and preserves existing data.
+- **`npx supabase db reset --local` destroys the local database.** It is for disposable test databases or an explicit request, never routine setup.
+- After any schema change run `npm run db:types`, which rewrites `src/server/database.types.ts` from the running local database. Commit that file with its migration so the two cannot drift.
+- Types are generated for API-exposed schemas only. `app_private` is deliberately absent from both the generated types and `api.schemas`.
+
+### Schema versus project settings
+
+Migrations capture tables, functions, grants, and policies. They do **not**
+capture Storage buckets, Auth redirect URLs, email templates, or SMTP
+credentials. Locally those live in `supabase/config.toml`; on a hosted project
+they are configured separately and must be reconciled by hand at release time.
 
 ### Planned full setup (not executable yet)
 
