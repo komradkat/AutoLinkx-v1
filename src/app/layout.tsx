@@ -11,6 +11,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { BottomNav } from '@/components/bottom-nav';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { getViewer } from '@/server/auth/viewer';
@@ -36,6 +37,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <SiteHeader viewer={viewer} />
         <main id="main">{children}</main>
         <SiteFooter />
+        <BottomNav viewer={viewer} />
       </body>
     </html>
   );
