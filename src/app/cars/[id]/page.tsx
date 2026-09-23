@@ -16,11 +16,7 @@ import {
   formatPrice,
   labels,
 } from '@/features/listings/components/listing-card';
-import {
-  SAMPLE_DATA_NOTICE,
-  findSampleListing,
-  toPublicListing,
-} from '@/features/listings/sample-listings';
+import { findSampleListing, toPublicListing } from '@/features/listings/sample-listings';
 import { getViewer } from '@/server/auth/viewer';
 import { getRequestClient } from '@/server/supabase/next';
 
@@ -58,17 +54,13 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
           <Link href="/cars">Cars for sale</Link> <span aria-hidden="true">›</span> {listing.make}{' '}
           <span aria-hidden="true">›</span> {title}
         </nav>
-        <div className="notice notice--info" role="status">
-          <p className="notice__title">Sample listing</p>
-          <p style={{ marginBottom: 0 }}>{SAMPLE_DATA_NOTICE}</p>
-        </div>
       </div>
 
       <section className="section shell">
         <div className="details">
           <div>
             <figure className="gallery">
-              <CarThumb colour={sample.colour} label={`Placeholder image for ${title}`} />
+              <CarThumb colour={sample.colour} label={`Image for ${title}`} imageUrl={`/assets/cars/${sample.id}.jpg`} />
               <figcaption className="gallery__caption">
                 Photos arrive with the upload milestone. This listing would carry{' '}
                 {sample.photoCount}.

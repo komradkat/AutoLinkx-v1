@@ -811,52 +811,6 @@ main {
     padding-bottom: 78px;
   }
 
-  .bottom-nav {
-    position: fixed;
-    inset-inline: 0;
-    bottom: 0;
-    z-index: 20;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    align-items: end;
-    background: var(--surface);
-    border-top: 1px solid var(--line);
-    padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
-  }
-
-  .bottom-nav__item {
-    display: grid;
-    justify-items: center;
-    gap: 2px;
-    padding: var(--space-1);
-    font-size: 0.72rem;
-    text-decoration: none;
-    color: var(--text-muted);
-  }
-
-  .bottom-nav__icon {
-    font-size: 1.15rem;
-    line-height: 1;
-  }
-
-  .bottom-nav__sell {
-    display: grid;
-    place-items: center;
-    width: 46px;
-    height: 46px;
-    margin-top: -18px;
-    border-radius: 50%;
-    background: var(--accent-strong);
-    color: var(--accent-contrast);
-    font-size: 1.5rem;
-    line-height: 1;
-    box-shadow: 0 4px 12px rgba(20, 22, 28, 0.22);
-  }
-
-  .bottom-nav__sell-label {
-    font-size: 0.72rem;
-  }
-
   /* Filters become a drawer opened from a chip, as in the mobile design. */
   .filters__summary {
     display: inline-flex;
@@ -971,5 +925,1231 @@ main {
 
   .spec-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Discovery modes: Feed / Pick / List (Ui design/mobile) ---------- */
+
+.discover__bar {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--space-3);
+}
+
+.discover__sample {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: var(--space-3);
+}
+
+.segmented {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.segmented__item {
+  padding: var(--space-2) var(--space-4);
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.segmented__item.is-current {
+  background: var(--ink);
+  color: var(--text-on-ink);
+}
+
+/* The Feed/List switch belongs to the mobile design only. */
+@media (min-width: 961px) {
+  .discover__bar {
+    display: none;
+  }
+}
+
+/* ---------- Mobile chrome: the design has no desktop header ---------- */
+
+.discover__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.button--outline {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.button--outline:hover {
+  background: var(--surface);
+}
+
+.profile__signout {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 960px) {
+  /*
+   * The mobile design has its own chrome — a compact bar on the discovery
+   * screens and the bottom tab bar everywhere — so the desktop header would
+   * duplicate navigation. Sign out moves to the profile screen.
+   */
+  .site-header {
+    display: none;
+  }
+
+  .discover__brand {
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+}
+
+@media (min-width: 961px) {
+  .discover__brand {
+    display: none;
+  }
+}
+
+/* ---------- Listing card, matched to Ui design (web 02, mobile list) ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.icon {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.listing-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.listing-card:hover {
+  box-shadow: 0 8px 24px rgba(20, 22, 28, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Warm backdrop and a fixed ratio, so every card's image band lines up. */
+.listing-card__media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  line-height: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      120% 90% at 50% 34%,
+      color-mix(in srgb, var(--tint, #e7e3da) 42%, #ffffff) 0%,
+      color-mix(in srgb, var(--tint, #e7e3da) 18%, var(--paper)) 60%,
+      color-mix(in srgb, var(--tint, #e7e3da) 6%, var(--paper)) 100%
+    );
+}
+
+.listing-card__media .car-thumb {
+  filter: drop-shadow(0 8px 12px rgba(20, 22, 28, 0.14));
+}
+
+/* Same treatment on the cards: photo bleeds to the rounded edges. */
+.listing-card__media:has(.car-thumb--photo) {
+  background: none;
+}
+
+.listing-card__media .car-thumb--photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.03);
+  filter: none;
+}
+
+.listing-card__media .car-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.listing-card__save {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(20, 22, 28, 0.15);
+}
+
+.listing-card__save .icon {
+  width: 17px;
+  height: 17px;
+}
+
+.listing-card__photos {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  background: rgba(20, 22, 28, 0.78);
+  color: var(--text-on-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.listing-card__photos .icon {
+  width: 13px;
+  height: 13px;
+}
+
+.listing-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+  padding: var(--space-4) 18px 14px;
+}
+
+.listing-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.listing-card__link {
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* The whole card is one target; the title link stretches over it. */
+.listing-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.listing-card__link:focus-visible {
+  outline: none;
+}
+
+.listing-card:has(.listing-card__link:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.listing-card__variant {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.listing-card__price {
+  margin: 2px 0 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.listing-card__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.listing-card__specs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Pinned to the bottom, so footers align across a row of uneven titles. */
+.listing-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.listing-card__footer .listing-card__location {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--text);
+  font-size: inherit;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listing-card__listed {
+  flex: none;
+  font-size: 0.8rem;
+}
+
+.listing-grid {
+  gap: 22px;
+}
+
+/* Mobile list card: price leads, then a short title, as in the mobile design. */
+@media (max-width: 960px) {
+  .listing-grid {
+    gap: 12px;
+  }
+
+  .listing-card:hover {
+    transform: none;
+  }
+
+  .listing-card__media {
+    aspect-ratio: 4 / 3;
+  }
+
+  .listing-card__save {
+    top: var(--space-2);
+    right: var(--space-2);
+    width: 30px;
+    height: 30px;
+  }
+
+  .listing-card__photos {
+    left: var(--space-2);
+    bottom: var(--space-2);
+  }
+
+  .listing-card__body {
+    gap: 3px;
+    padding: 10px 12px 12px;
+  }
+
+  .listing-card__price {
+    order: -1;
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  .listing-card__title {
+    font-size: 0.86rem;
+  }
+
+  .listing-card__variant,
+  .listing-card__fuel,
+  .listing-card__listed {
+    display: none;
+  }
+
+  .listing-card__specs {
+    font-size: 0.78rem;
+    gap: 2px 8px;
+  }
+
+  .listing-card__specs .icon {
+    display: none;
+  }
+
+  .listing-card__footer {
+    padding-top: 6px;
+    border-top: 0;
+    font-size: 0.78rem;
+  }
+
+  .listing-card__footer .listing-card__location {
+    color: var(--text-muted);
+  }
+
+  .listing-card__footer .icon {
+    display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  /* Beats `.listing-card__specs li`, which sets display on every item. */
+  .listing-card__specs .listing-card__fuel {
+    display: none;
+  }
+}
+
+/* Letterboxed artwork blends into the card instead of showing white bars. */
+.feed__media .car-thumb {
+  background: #e7e3da;
+}
+
+/* ---------- Feed (Ui design/mobile/01-Discover-feed) ---------- */
+
+/*
+ * Picture first. The car fills the card; a compact caption fades over only
+ * the bottom third, and the actions float on the right beside it. The caption
+ * keeps a right gutter the width of the action rail, so the two never overlap.
+ */
+
+.discover--feed {
+  display: flex;
+  flex-direction: column;
+}
+
+.feed {
+  background: var(--ink);
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+  background: #e7e3da;
+  /* Wide screens: a phone-width column, since the feed is a mobile mode. */
+  height: min(80vh, 760px);
+  width: min(100%, 28rem);
+  margin-inline: auto;
+  border-radius: var(--radius-lg);
+}
+
+.feed__card {
+  position: relative;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+  background: #e7e3da;
+  color: var(--text-on-ink);
+}
+
+/* The car is centred in the area the caption leaves clear. */
+/*
+ * Full-bleed, lit from above, tinted by the car itself. A single flat beige
+ * behind every car was what made the feed read as a mockup.
+ */
+.feed__media {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 7% 5% 34%;
+  background:
+    radial-gradient(
+      125% 85% at 50% 32%,
+      color-mix(in srgb, var(--tint, #e7e3da) 48%, #ffffff) 0%,
+      color-mix(in srgb, var(--tint, #e7e3da) 20%, var(--paper)) 52%,
+      color-mix(in srgb, var(--tint, #e7e3da) 8%, var(--paper)) 100%
+    );
+}
+
+.feed__media .car-thumb {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  filter: drop-shadow(0 18px 24px rgba(20, 22, 28, 0.18));
+}
+
+/*
+ * A real photo fills the whole card and overflows it slightly, so its straight
+ * edges are cropped away by the card's rounded corners instead of sitting
+ * inside a visible frame. The drawing keeps its padded, tinted stage.
+ */
+.feed__media:has(.car-thumb--photo) {
+  inset: 0;
+  padding: 0;
+  background: none;
+}
+
+/* A blurred copy of the photo fills the frame behind it. */
+.feed__media:has(.car-thumb--photo)::before {
+  content: '';
+  position: absolute;
+  inset: -6%;
+  z-index: 0;
+  background: var(--photo) center / cover no-repeat;
+  filter: blur(26px) saturate(125%) brightness(0.88);
+}
+
+.feed__media .car-thumb--photo {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  /* Whole car, never cropped; the blur behind hides the letterboxing. */
+  object-fit: contain;
+  transform: none;
+  filter: drop-shadow(0 12px 26px rgba(20, 22, 28, 0.32));
+}
+
+/* Keeps the counter legible over a light car. */
+.feed__slide::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 88px;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(20, 22, 28, 0.28), rgba(20, 22, 28, 0));
+}
+
+.feed__counter {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 3;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(20, 22, 28, 0.72);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.feed__overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  padding: 44px 70px 30px var(--space-4);
+  background: linear-gradient(
+    180deg,
+    rgba(20, 22, 28, 0) 0%,
+    rgba(20, 22, 28, 0.72) 32%,
+    rgba(20, 22, 28, 0.92) 100%
+  );
+}
+
+.feed__info {
+  display: grid;
+  gap: 3px;
+}
+
+.feed__chips {
+  display: flex;
+  gap: 5px;
+  margin: 0 0 2px;
+}
+
+.feed__chip {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* One line: a long model name truncates rather than growing the caption. */
+.feed__title {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.feed__price {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.feed__specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: rgba(244, 242, 238, 0.82);
+  font-size: 0.8rem;
+}
+
+.feed__specs li + li::before {
+  content: '·';
+  margin-right: 6px;
+}
+
+.feed__cta {
+  justify-self: start;
+  margin-top: 5px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: var(--text-on-ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Floats over the picture on the right; the caption's gutter keeps it clear. */
+.feed__rail {
+  position: absolute;
+  /* Labels are wider than their circles, so the rail keeps its own margin. */
+  right: 6px;
+  bottom: 30px;
+  z-index: 3;
+  display: grid;
+  gap: 10px;
+}
+
+.feed__action {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 58px;
+  text-align: center;
+  color: var(--text-on-ink);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.feed__action-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(20, 22, 28, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 1rem;
+  text-shadow: none;
+}
+
+.feed__hint {
+  position: absolute;
+  inset: auto 0 14px 0;
+  z-index: 3;
+  margin: 0;
+  text-align: center;
+  color: rgba(244, 242, 238, 0.7);
+  font-size: 0.7rem;
+}
+
+@media (max-width: 960px) {
+  /* One screen: the feed takes exactly what the bars leave. */
+  .discover--feed {
+    height: calc(100dvh - 78px);
+  }
+
+  .feed {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    width: 100%;
+    border-radius: 0;
+  }
+
+  body:has(.discover--feed) .site-footer {
+    display: none;
+  }
+}
+
+/* Short phones: drop the chips so the picture keeps its space. */
+@media (max-width: 960px) and (max-height: 680px) {
+  .feed__chips {
+    display: none;
+  }
+
+  .feed__media {
+    inset: 0 0 28% 0;
+  }
+
+  .feed__overlay {
+    padding-top: 36px;
+  }
+}
+
+/* ---------- Mobile tab bar (Ui design/mobile/00-Mobile-overview) ---------- */
+
+@media (max-width: 960px) {
+  /* Dark bar with light icons, as in the design. Total height stays 78px,
+     which the feed, sticky bars and toasts already reserve. */
+  .bottom-nav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    height: calc(78px + env(safe-area-inset-bottom));
+    padding: 6px var(--space-2) calc(6px + env(safe-area-inset-bottom));
+    background: var(--ink);
+    border-top: 1px solid var(--line-on-ink);
+  }
+
+  .tab {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 4px;
+    min-height: 56px; /* comfortable touch target */
+    padding: 4px 2px;
+    border-radius: var(--radius);
+    color: var(--text-on-ink-muted);
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tab-icon {
+    width: 23px;
+    height: 23px;
+  }
+
+  /* Current tab: brighter, bolder, and marked with a bar — not colour alone. */
+  .tab.is-active {
+    color: var(--text-on-ink);
+    font-weight: 700;
+  }
+
+  .tab.is-active::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    width: 22px;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--accent);
+  }
+
+  .tab:active {
+    background: var(--ink-soft);
+  }
+
+  /* Sell: the orange centre action, sitting inside the bar. */
+  .tab--sell {
+    color: var(--text-on-ink);
+  }
+
+  .tab--sell.is-active::before {
+    display: none;
+  }
+
+  .tab__sell {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--accent-strong);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(226, 112, 15, 0.35);
+  }
+
+  .tab--sell:active .tab__sell {
+    background: var(--accent);
+  }
+
+  .tab__sell .tab-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .tab__avatar {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .tab.is-active .tab__avatar {
+    box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--text-on-ink);
+  }
+
+  .tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+}
+
+/*
+ * Only the feed scrolls on the feed screen.
+ *
+ * `100dvh` is taller than the visible area while a phone's URL bar is on
+ * screen, which left the document scrollable too: dragging from the top of a
+ * card moved the whole page instead of the feed. Locking the document here
+ * leaves exactly one scroller.
+ */
+@media (max-width: 960px) {
+  html:has(.discover--feed),
+  body:has(.discover--feed) {
+    overflow: hidden;
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  body:has(.discover--feed) {
+    padding-bottom: 0;
+  }
+
+  .discover--feed {
+    height: calc(100dvh - 78px - env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- Feed swipe: the card moves, nothing rests off-screen ---------- */
+
+.feed__card {
+  touch-action: pan-y; /* up and down stay with the feed; sideways is ours */
+}
+
+.feed__slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* Settles back with a little overshoot instead of a flat ease. */
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease;
+  will-change: transform;
+}
+
+.feed__slide[data-dragging] {
+  transition: none;
+  user-select: none;
+  box-shadow: -14px 0 34px rgba(20, 22, 28, 0.3);
+}
+
+.feed__slide[data-leaving] {
+  transition:
+    transform 300ms cubic-bezier(0.36, 0, 0.7, 0.2),
+    opacity 300ms ease-in;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+/*
+ * Revealed as the card slides right: frosted light glass over whatever the
+ * card's backdrop is, rather than a block of colour. Green belonged to no
+ * other screen, and solid ink fought the light media behind it.
+ * `--reveal` runs 0 → 1 with the drag.
+ */
+.feed__save-pane {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-left: var(--space-5);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.86) 0%,
+    rgba(255, 255, 255, 0.46) 58%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  backdrop-filter: blur(16px) saturate(135%);
+}
+
+.feed__save-badge {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--text);
+  box-shadow: 0 10px 24px rgba(20, 22, 28, 0.16);
+  /* Grows with the drag rather than appearing all at once. */
+  transform: scale(calc(0.72 + 0.28 * var(--reveal, 0)));
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    box-shadow 200ms ease;
+}
+
+.feed__save-label {
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  opacity: var(--reveal, 0);
+}
+
+/* Past the threshold: releasing now saves. Accent ring, still glassy. */
+.feed__save-pane[data-armed] .feed__save-badge {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--accent-strong);
+  box-shadow:
+    0 0 0 8px rgba(226, 112, 15, 0.18),
+    0 12px 26px rgba(20, 22, 28, 0.2);
+  transform: scale(1.08);
+}
+
+.feed__saved {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(20, 22, 28, 0.14);
+  animation: feed-pop 320ms ease-out;
+}
+
+.feed__saved svg {
+  color: var(--accent-strong);
+}
+
+button.feed__action {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.feed__action.is-reacted .feed__action-icon {
+  background: #d7263d;
+  border-color: #d7263d;
+  animation: feed-pop 320ms ease-out;
+}
+
+.feed__action.is-saved .feed__action-icon {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+@keyframes feed-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.feed__toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  z-index: 30;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--text-on-ink);
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(20, 22, 28, 0.25);
+}
+
+@media (min-width: 961px) {
+  .feed__toast {
+    bottom: var(--space-6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed__slide {
+    transition: none;
+  }
+
+  .feed__action.is-reacted .feed__action-icon {
+    animation: none;
+  }
+}
+
+/* ---------- Mobile tab bar (Ui design/mobile/00-Mobile-overview) ---------- */
+
+@media (max-width: 960px) {
+  /* Dark bar with light icons, as in the design. Total height stays 78px,
+     which the feed, sticky bars and toasts already reserve. */
+  .bottom-nav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    height: calc(78px + env(safe-area-inset-bottom));
+    padding: 6px var(--space-2) calc(6px + env(safe-area-inset-bottom));
+    background: var(--ink);
+    border-top: 1px solid var(--line-on-ink);
+  }
+
+  .tab {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 4px;
+    min-height: 56px; /* comfortable touch target */
+    padding: 4px 2px;
+    border-radius: var(--radius);
+    color: var(--text-on-ink-muted);
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tab-icon {
+    width: 23px;
+    height: 23px;
+  }
+
+  /* Current tab: brighter, bolder, and marked with a bar — not colour alone. */
+  .tab.is-active {
+    color: var(--text-on-ink);
+    font-weight: 700;
+  }
+
+  .tab.is-active::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    width: 22px;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--accent);
+  }
+
+  .tab:active {
+    background: var(--ink-soft);
+  }
+
+  /* Sell: the orange centre action, sitting inside the bar. */
+  .tab--sell {
+    color: var(--text-on-ink);
+  }
+
+  .tab--sell.is-active::before {
+    display: none;
+  }
+
+  .tab__sell {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--accent-strong);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(226, 112, 15, 0.35);
+  }
+
+  .tab--sell:active .tab__sell {
+    background: var(--accent);
+  }
+
+  .tab__sell .tab-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .tab__avatar {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .tab.is-active .tab__avatar {
+    box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--text-on-ink);
+  }
+
+  .tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+}
+
+/*
+ * Only the feed scrolls on the feed screen.
+ *
+ * `100dvh` is taller than the visible area while a phone's URL bar is on
+ * screen, which left the document scrollable too: dragging from the top of a
+ * card moved the whole page instead of the feed. Locking the document here
+ * leaves exactly one scroller.
+ */
+@media (max-width: 960px) {
+  html:has(.discover--feed),
+  body:has(.discover--feed) {
+    overflow: hidden;
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  body:has(.discover--feed) {
+    padding-bottom: 0;
+  }
+
+  .discover--feed {
+    height: calc(100dvh - 78px - env(safe-area-inset-bottom));
+  }
+}
+
+
+/* ---------- Results page (Ui design web 02 / mobile List) ---------- */
+
+.results-page__crumb {
+  margin-bottom: var(--space-2);
+}
+
+.results-page__title {
+  font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.6rem);
+  margin-bottom: var(--space-5);
+}
+
+.results__main {
+  min-width: 0;
+}
+
+/* Search field and its button read as one control. */
+.results__search {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.results__search .field__control {
+  flex: 1;
+  min-width: 0;
+}
+
+.results__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.results__count {
+  margin: 0;
+}
+
+.results__sort {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.results__sort .field__label {
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.results__sort .field__control {
+  padding: var(--space-2) var(--space-3);
+}
+
+.results__sort-apply {
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.filters legend.filters__heading {
+  padding: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.filters.card {
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 960px) {
+  /* The design leads with the search field, not a page title. */
+  .results-page__crumb {
+    display: none;
+  }
+
+  .results-page__title {
+    font-size: 1.35rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .results__meta {
+    gap: var(--space-2);
+  }
+
+  .results__sort {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .results__sort .field__label {
+    display: none;
+  }
+
+  .results__sort-apply {
+    padding: var(--space-2) var(--space-3);
   }
 }

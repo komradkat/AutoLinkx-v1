@@ -1,52 +1,37 @@
 /**
- * Mobile bottom tab bar, from `Ui design/mobile/00-Mobile-overview.png`.
+ * Mobile tab bar, from `Ui design/mobile/00-Mobile-overview.png`.
  *
- * Hidden from 960px up, where the header navigation takes over. Sell is the
- * raised centre action, as in the design.
+ * Dark bar, line icons, the current tab highlighted, and Sell as the orange
+ * centre action. Hidden from 960px up, where the header takes over.
  *
- * Only Discover, Search and Account lead anywhere today; the rest reach the
- * not-built-yet screen until their milestones land.
+ * Identity is read on the server and passed down; the client part only knows
+ * the current path. Saved and Sell reach the not-built-yet screen until their
+ * milestones land.
  */
-import Link from 'next/link';
-
 import type { Viewer } from '@/contracts';
 import { AUTH_ROUTES } from '@/contracts';
 
+import { BottomNavLinks } from './bottom-nav-links';
+
+function initialsOf(name: string): string {
+  const letters = name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0] ?? '')
+    .join('');
+  return letters.toUpperCase() || 'A';
+}
+
 export function BottomNav({ viewer }: { viewer: Viewer }) {
-  const accountHref = viewer.status === 'signed_in' ? '/profile' : AUTH_ROUTES.login;
+  const signedIn = viewer.status === 'signed_in';
 
   return (
     <nav className="bottom-nav" aria-label="Main">
-      <Link className="bottom-nav__item" href="/">
-        <span className="bottom-nav__icon" aria-hidden="true">
-          ◎
-        </span>
-        Discover
-      </Link>
-      <Link className="bottom-nav__item" href="/cars">
-        <span className="bottom-nav__icon" aria-hidden="true">
-          ⌕
-        </span>
-        Search
-      </Link>
-      <Link className="bottom-nav__item bottom-nav__item--sell" href="/dashboard/listings/new">
-        <span className="bottom-nav__sell" aria-hidden="true">
-          +
-        </span>
-        <span className="bottom-nav__sell-label">Sell</span>
-      </Link>
-      <Link className="bottom-nav__item" href="/saved">
-        <span className="bottom-nav__icon" aria-hidden="true">
-          ♡
-        </span>
-        Saved
-      </Link>
-      <Link className="bottom-nav__item" href={accountHref}>
-        <span className="bottom-nav__icon" aria-hidden="true">
-          ☺
-        </span>
-        Account
-      </Link>
+      <BottomNavLinks
+        accountHref={signedIn ? '/profile' : AUTH_ROUTES.login}
+        initials={signedIn ? initialsOf(viewer.displayName) : null}
+      />
     </nav>
   );
 }

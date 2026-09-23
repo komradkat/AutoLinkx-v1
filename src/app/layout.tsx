@@ -28,8 +28,11 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const viewer = await getViewer(await getRequestClient());
 
+  // `suppressHydrationWarning` on <html>: browser extensions add attributes to
+  // it before React hydrates, which React reports as a mismatch. It covers
+  // this element's attributes only, nothing inside the tree.
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <a className="skip-link" href="#main">
           Skip to content

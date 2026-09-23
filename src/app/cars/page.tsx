@@ -1,11 +1,15 @@
 /**
- * Cars for sale, following `Ui design/web/02-Search-results.png`.
+ * Cars for sale, following `Ui design/web/02-Search-results.png` and the List
+ * mode in `Ui design/mobile/00-Mobile-overview.png`.
  *
- * **Rendered from test-only sample data.** The listings tables do not exist
- * yet (A-08) and neither do the public queries (A-12, A-13), so the filters
- * narrow the fixtures in memory. The URL keys, sort values and page size are
- * the real ones from the contract, so wiring this to live queries later is a
- * swap of the data source, not a rewrite.
+ * Search, sort and filters are one form, so each control keeps the others'
+ * values and the whole page works without JavaScript. On mobile the filters
+ * collapse behind a chip, as in the design.
+ *
+ * Still rendered from sample listings: the tables (A-08) and the public
+ * queries (A-12, A-13) do not exist yet. The URL keys, sort values and page
+ * size come from the shared contract, so moving to live data is a change of
+ * source, not a rewrite.
  */
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -20,9 +24,10 @@ import {
   VEHICLE_CONDITIONS,
   type ListingSort,
 } from '@/contracts';
+import { DiscoveryTabs } from '@/features/listings/components/discovery-tabs';
 import { FilterDrawer } from '@/features/listings/components/filter-drawer';
 import { ListingCard, labels } from '@/features/listings/components/listing-card';
-import { SAMPLE_DATA_NOTICE, SAMPLE_LISTINGS } from '@/features/listings/sample-listings';
+import { SAMPLE_LISTINGS } from '@/features/listings/sample-listings';
 
 export const metadata: Metadata = { title: 'Cars for sale — AutoLinkX' };
 
@@ -39,6 +44,14 @@ function number(params: Params, key: string): number | null {
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : null;
 }
+
+const SORT_LABELS: Record<ListingSort, string> = {
+  newest: 'Newest',
+  price_asc: 'Price: low to high',
+  price_desc: 'Price: high to low',
+  year_desc: 'Year: newest first',
+  mileage_asc: 'Mileage: lowest first',
+};
 
 export default async function CarsPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
@@ -81,44 +94,26 @@ export default async function CarsPage({ searchParams }: { searchParams: Promise
   });
 
   const page = sorted.slice(0, PAGE_SIZE);
-
-  // Drives the "Filters · N" chip in the mobile design.
-  const activeFilters = [keyword, transmission, fuel, condition, priceMax, yearMin].filter(
+  const activeFilters = [transmission, fuel, condition, priceMax, yearMin].filter(
     (value) => value !== '' && value !== null,
   ).length;
 
   return (
-    <>
-      <div className="shell" style={{ paddingTop: 'var(--space-5)' }}>
-        <nav aria-label="Breadcrumb" className="breadcrumb">
-          <Link href="/">Home</Link> <span aria-hidden="true">›</span> Cars for sale
-        </nav>
-        <div className="notice notice--info" role="status">
-          <p className="notice__title">Sample listings</p>
-          <p style={{ marginBottom: 0 }}>{SAMPLE_DATA_NOTICE}</p>
-        </div>
+    <section className="section shell results-page">
+      <div className="discover__bar">
+        <DiscoveryTabs current="/cars" />
       </div>
 
-      <section className="section shell">
-        <h1>Cars for sale</h1>
+      <nav aria-label="Breadcrumb" className="breadcrumb results-page__crumb">
+        <Link href="/">Home</Link> <span aria-hidden="true">›</span> Cars for sale
+      </nav>
 
-        <div className="results">
-          <FilterDrawer activeFilters={activeFilters}>
-            <form className="filters card" method="get" aria-label="Filter cars">
-              <h2 className="filters__heading">Filters</h2>
+      <h1 className="results-page__title">Cars for sale</h1>
 
-            <div className="field">
-              <label className="field__label" htmlFor={SEARCH_PARAM_KEYS.keyword}>
-                Keyword
-              </label>
-              <input
-                className="field__control"
-                id={SEARCH_PARAM_KEYS.keyword}
-                name={SEARCH_PARAM_KEYS.keyword}
-                defaultValue={one(params, SEARCH_PARAM_KEYS.keyword)}
-                placeholder="Make, model or city"
-              />
-            </div>
+      <form method="get" className="results">
+        <FilterDrawer activeFilters={activeFilters}>
+          <fieldset className="filters card">
+            <legend className="filters__heading">Filters</legend>
 
             <div className="field">
               <label className="field__label" htmlFor={SEARCH_PARAM_KEYS.yearMin}>
@@ -130,6 +125,7 @@ export default async function CarsPage({ searchParams }: { searchParams: Promise
                 name={SEARCH_PARAM_KEYS.yearMin}
                 inputMode="numeric"
                 defaultValue={one(params, SEARCH_PARAM_KEYS.yearMin)}
+                placeholder="Any"
               />
             </div>
 
@@ -143,6 +139,7 @@ export default async function CarsPage({ searchParams }: { searchParams: Promise
                 name={SEARCH_PARAM_KEYS.priceMinorMax}
                 inputMode="numeric"
                 defaultValue={one(params, SEARCH_PARAM_KEYS.priceMinorMax)}
+                placeholder="No max"
               />
             </div>
 
@@ -203,7 +200,40 @@ export default async function CarsPage({ searchParams }: { searchParams: Promise
               </select>
             </div>
 
-            <div className="field">
+            <div className="form__actions">
+              <button className="button button--primary" type="submit">
+                Show {sorted.length} cars
+              </button>
+              <Link className="linkish" href="/cars">
+                Reset all
+              </Link>
+            </div>
+          </fieldset>
+        </FilterDrawer>
+
+        <div className="results__main">
+          <div className="results__search">
+            <label className="visually-hidden" htmlFor={SEARCH_PARAM_KEYS.keyword}>
+              Search cars
+            </label>
+            <input
+              className="field__control"
+              id={SEARCH_PARAM_KEYS.keyword}
+              name={SEARCH_PARAM_KEYS.keyword}
+              type="search"
+              defaultValue={one(params, SEARCH_PARAM_KEYS.keyword)}
+              placeholder="Make, model or city"
+            />
+            <button className="button button--primary" type="submit">
+              Search
+            </button>
+          </div>
+
+          <div className="results__meta">
+            <p className="results__count" role="status">
+              <strong>{sorted.length}</strong> {sorted.length === 1 ? 'car matches' : 'cars match'}
+            </p>
+            <div className="results__sort">
               <label className="field__label" htmlFor={SEARCH_PARAM_KEYS.sort}>
                 Sort by
               </label>
@@ -213,54 +243,40 @@ export default async function CarsPage({ searchParams }: { searchParams: Promise
                 name={SEARCH_PARAM_KEYS.sort}
                 defaultValue={sort}
               >
-                <option value="newest">Newest</option>
-                <option value="price_asc">Price: low to high</option>
-                <option value="price_desc">Price: high to low</option>
-                <option value="year_desc">Year: newest first</option>
-                <option value="mileage_asc">Mileage: lowest first</option>
-              </select>
-            </div>
-
-              <div className="form__actions">
-                <button className="button button--primary" type="submit">
-                  Show {sorted.length} cars
-                </button>
-                <Link className="linkish" href="/cars">
-                  Reset all
-                </Link>
-              </div>
-            </form>
-          </FilterDrawer>
-
-          <div>
-            <p className="results__count" role="status">
-              <strong>{sorted.length}</strong> {sorted.length === 1 ? 'car matches' : 'cars match'}
-            </p>
-
-            {page.length === 0 ? (
-              <div className="card">
-                <h2>No cars match those filters</h2>
-                <p style={{ marginBottom: 0 }}>
-                  Widen the price or year range, or <Link href="/cars">clear all filters</Link>.
-                </p>
-              </div>
-            ) : (
-              <ul className="listing-grid">
-                {page.map((listing) => (
-                  <li key={listing.id}>
-                    <ListingCard listing={listing} />
-                  </li>
+                {LISTING_SORTS.map((value) => (
+                  <option key={value} value={value}>
+                    {SORT_LABELS[value]}
+                  </option>
                 ))}
-              </ul>
-            )}
-
-            <p className="results__pagination">
-              Showing 1–{page.length} of {sorted.length} cars · pagination arrives with real
-              listings
-            </p>
+              </select>
+              <button className="button button--quiet results__sort-apply" type="submit">
+                Apply
+              </button>
+            </div>
           </div>
+
+          {page.length === 0 ? (
+            <div className="card">
+              <h2>No cars match those filters</h2>
+              <p style={{ marginBottom: 0 }}>
+                Widen the price or year range, or <Link href="/cars">clear all filters</Link>.
+              </p>
+            </div>
+          ) : (
+            <ul className="listing-grid">
+              {page.map((listing) => (
+                <li key={listing.id}>
+                  <ListingCard listing={listing} />
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <p className="results__pagination">
+            Showing 1–{page.length} of {sorted.length} cars
+          </p>
         </div>
-      </section>
-    </>
+      </form>
+    </section>
   );
 }

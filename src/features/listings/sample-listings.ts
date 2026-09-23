@@ -22,7 +22,7 @@ import type { PublicListing, PublicListingSummary } from '@/contracts';
 export const SAMPLE_DATA_NOTICE =
   'Sample data. Real listings arrive with the listings milestone — nothing here is a car for sale.';
 
-interface Sample extends PublicListingSummary {
+export interface SampleListing extends PublicListingSummary {
   description: string;
   sellerName: string;
   sellerLocation: string;
@@ -36,7 +36,7 @@ interface Sample extends PublicListingSummary {
 
 const CURRENCY = 'PHP';
 
-export const SAMPLE_LISTINGS: readonly Sample[] = [
+export const SAMPLE_LISTINGS: readonly SampleListing[] = [
   {
     id: 'sample-fortuner',
     make: 'Toyota',
@@ -249,12 +249,12 @@ export const SAMPLE_LISTINGS: readonly Sample[] = [
   },
 ];
 
-export function findSampleListing(id: string): Sample | undefined {
+export function findSampleListing(id: string): SampleListing | undefined {
   return SAMPLE_LISTINGS.find((listing) => listing.id === id);
 }
 
 /** Shapes a sample into the real detail DTO, so the screens read the contract. */
-export function toPublicListing(sample: Sample): PublicListing {
+export function toPublicListing(sample: SampleListing): PublicListing {
   return {
     ...sample,
     description: sample.description,
