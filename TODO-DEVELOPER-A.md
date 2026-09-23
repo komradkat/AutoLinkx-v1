@@ -130,13 +130,17 @@ You own database migrations, server modules/actions/queries, contracts, authenti
 
 **Dependencies:** A-02 through A-06.
 
-- [ ] Create isolated test actors: anonymous, unconfirmed, confirmed seller A, confirmed seller B, and administrator.
-- [ ] Add direct API tests for contact privacy, ownership, grants, administrator escalation, and profile initialization.
-- [ ] Add service tests for invalid account/profile inputs and safe error mapping.
-- [ ] Establish CI install/typecheck/lint/tests/build with disposable local Supabase and no hosted secrets for untrusted PRs.
+- [x] Create isolated test actors: anonymous, unconfirmed, confirmed seller A, confirmed seller B, and administrator.
+- [x] Add direct API tests for contact privacy, ownership, grants, administrator escalation, and profile initialization.
+- [x] Add service tests for invalid account/profile inputs and safe error mapping.
+- [x] Establish CI install/typecheck/lint/tests/build with disposable local Supabase and no hosted secrets for untrusted PRs.
 - [ ] Run tests and share the verified environment with B; do not bypass failed checks to unblock fixture UI.
 
 **Gate G1:** clean-checkout startup and live account flows work; privacy and role controls pass.
+
+**Status (2026-09-23):** CI now has a second job that starts a **disposable local Supabase in the runner**, applies the migration history to an empty database, runs the permission and account tests that otherwise skip themselves, and fails if `src/server/database.types.ts` drifts from the migrations. No hosted secrets are used, so it runs for pull requests from forks. Added 14 unit tests for safe error mapping: every provider failure becomes one of the agreed codes, messages never repeat provider text, and a wrong password, an unknown account and a taken address are all answered without revealing whether an account exists.
+
+**Not yet verified:** the workflow has **never executed** — GitHub Actions is blocked by an account billing lock, so the database job is written but unproven. Two A-06 confirmation-link tests still fail locally pending a Supabase restart for the new email templates. G1 is not closed until both are green on a runner.
 
 ## Stage 2 — Seller workflow
 

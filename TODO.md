@@ -65,7 +65,7 @@ Changes to a published contract need a small joint review and updates to fixture
 - [ ] **A-04:** Implement request-scoped Supabase clients, SSR token refresh, verified identity, and isolated privileged clients. *(Done and locally verified; **PR #4** open. Administrator membership failed closed here until A-05 landed the table.)*
 - [ ] **A-05:** Add profiles/private contacts/administrator membership, initialization, RLS, grants, and safe projections. *(Done and locally verified; **PR #5** open, stacked on #4. 16 permission tests run as ordinary users and anonymous callers through the Data API.)*
 - [ ] **A-06:** Implement register/confirm/login/logout/recovery/profile actions, safe redirects, and operator-only administrator bootstrap. *(Done; **PR #6** open, stacked on #5. **Two confirmation-link cases are unverified** — Docker was unresponsive when they were due to run. Email templates now link to the app's own routes with a token hash, because the Supabase default only works in the browser that requested it.)*
-- [ ] **A-07:** Test account permissions, profile isolation, role escalation denial, and recovery behavior; add baseline CI. *(Next task for A. Note: CI exists but **has never executed** — GitHub Actions is blocked by an account billing lock.)*
+- [ ] **A-07:** Test account permissions, profile isolation, role escalation denial, and recovery behavior; add baseline CI. *(Written on `dev-a/A-07-foundation-ci`: CI gained a disposable-Supabase job that applies migrations, runs the permission tests and checks generated-type drift, plus 14 error-mapping unit tests. **Unproven — Actions is blocked by an account billing lock, so the workflow has never run.**)*
 
 ### B — Other developer's TODOs
 
