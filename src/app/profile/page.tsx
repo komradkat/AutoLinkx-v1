@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { Notice } from '@/components/form-controls';
 import { AUTH_ROUTES } from '@/contracts';
+import { logoutAction } from '@/features/accounts/actions';
 import { ProfileForm } from '@/features/accounts/components/account-forms';
 import { getOwnProfile } from '@/features/accounts/service';
 import { getRequestClient } from '@/server/supabase/next';
@@ -38,6 +39,13 @@ export default async function ProfilePage() {
         Control what other people see. Nothing here is published unless you say so.
       </p>
       <ProfileForm profile={result.data} />
+
+      {/* The header holds sign out on desktop; on mobile it is hidden. */}
+      <form action={logoutAction} className="profile__signout">
+        <button className="button button--outline" type="submit">
+          Sign out
+        </button>
+      </form>
     </section>
   );
 }

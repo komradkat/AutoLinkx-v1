@@ -11,6 +11,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import { BottomNav } from '@/components/bottom-nav';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { getViewer } from '@/server/auth/viewer';
@@ -27,8 +28,11 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const viewer = await getViewer(await getRequestClient());
 
+  // `suppressHydrationWarning` on <html>: browser extensions add attributes to
+  // it before React hydrates, which React reports as a mismatch. It covers
+  // this element's attributes only, nothing inside the tree.
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
         <a className="skip-link" href="#main">
           Skip to content
@@ -36,6 +40,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <SiteHeader viewer={viewer} />
         <main id="main">{children}</main>
         <SiteFooter />
+        <BottomNav viewer={viewer} />
       </body>
     </html>
   );

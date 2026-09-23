@@ -11,6 +11,7 @@ concurrency:
 
 jobs:
   check:
+    name: Lint, types, unit tests, build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -23,5 +24,62 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-# A-07 owns the rest: disposable local Supabase, migrations, generated-type
-# drift, and permission tests. No hosted secrets are used for untrusted PRs.
+
+  database:
+    name: Database permissions (disposable Supabase)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      - name: Install the Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # A throwaway stack in the runner. No hosted project is contacted and no
+      # secret is needed, so this runs for pull requests from forks too.
+      - name: Start local Supabase
+        run: supabase start
+
+      # `supabase start` applies the migration history to an empty database,
+      # so a green run proves migrations apply from scratch.
+      - name: Publish local credentials to the job
+        run: |
+          supabase status -o env | sed 's/^/SUPABASE_/' >> "$GITHUB_ENV"
+          {
+            echo "APP_URL=http://localhost:3000"
+            echo "MARKETPLACE_CURRENCY=PHP"
+            echo "LISTING_PHOTOS_BUCKET=listing-photos"
+            echo "LOG_LEVEL=error"
+          } >> "$GITHUB_ENV"
+
+      - name: Map CLI names to the application's variables
+        run: |
+          {
+            echo "SUPABASE_URL=$SUPABASE_API_URL"
+            echo "SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY"
+            echo "SUPABASE_SECRET_KEY=$SUPABASE_SECRET_KEY"
+          } >> "$GITHUB_ENV"
+
+      # These are the tests that skip themselves when no stack is reachable.
+      # Running them here is the difference between "green" and "verified".
+      - name: Permission and account tests
+        run: npm test
+
+      - name: Fail if generated types drift from the migrations
+        run: |
+          npm run db:types
+          git diff --exit-code src/server/database.types.ts \
+            || (echo "::error::src/server/database.types.ts is out of date. Run npm run db:types and commit it." && exit 1)
+
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop
+# Untrusted pull requests receive no secrets: both jobs use only the throwaway
+# stack above. Staging and production credentials belong to the deployment
+# workflow (A-23), not here.
